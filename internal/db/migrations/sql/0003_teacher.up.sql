@@ -1,0 +1,7 @@
+CREATE TABLE teachers (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL UNIQUE,
+    CONSTRAINT fk_teacher_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);

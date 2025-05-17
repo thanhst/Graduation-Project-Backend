@@ -8,7 +8,7 @@ type Scheduler struct {
 	SchedulerId string    `gorm:"type:varchar(255);primaryKey;not null;index"`
 	RoomId      string    `gorm:"type:varchar(255);not null;index"`
 	UserId      string    `gorm:"not null;index"`
-	ClassId     string    `gorm:"type:varchar(255);index"`
+	ClassId     *string   `gorm:"type:varchar(255);index"`
 	StartTime   time.Time `gorm:"not null"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`

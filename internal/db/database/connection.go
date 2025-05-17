@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	migration "server/internal/db/migrations"
+	"server/internal/utils/dotenv"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -54,18 +56,29 @@ func ConnectDB() error {
 		return fmt.Errorf("failed to connect database: %w", err)
 	}
 
-
 	GDB = db
-	err = migration.Migrate(GDB)
-	if err != nil {
-		return fmt.Errorf("error to migration: %w", err)
-	}
 
-	// if dotenv.GetDotEnv("APP_ENV") == "develop" {
-	// 	if checkFlag := migration.SeedAll(GDB); !checkFlag {
-	// 		return fmt.Errorf("error to seed data")
-	// 	}
-	// }
+	schemaVer := dotenv.GetDotEnv("SCHEMA_VER")
+	schemaVerInt, err := strconv.Atoi(schemaVer)
+	if err != nil {
+		return fmt.Errorf("error to convert schema version: %w", err)
+	}
+	if schemaVerInt == 0 {
+		err = migration.MigrateWithMigration(GDB)
+		if err != nil {
+			return fmt.Errorf("error to migration: %w", err)
+		}
+
+		if dotenv.GetDotEnv("APP_ENV") == "develop" {
+			if checkFlag := migration.SeedAll(GDB); !checkFlag {
+				return fmt.Errorf("error to seed data")
+			}
+		}
+		err = dotenv.SetDotEnv("SCHEMA_VER", "1")
+		if err != nil {
+			return fmt.Errorf("error updating APP_ENV: %v", err)
+		}
+	}
 
 	fmt.Println("Connect success to database")
 	return nil
