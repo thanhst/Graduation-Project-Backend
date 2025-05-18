@@ -45,12 +45,10 @@ func ConnectDB() error {
 		return fmt.Errorf("failed to create db: %w", err)
 	}
 
-	// Chuẩn bị DSN (Data Source Name)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		user, pass, host, port, dbname,
 	)
 
-	// Mở kết nối với MySQL bằng GORM
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to connect database: %w", err)
