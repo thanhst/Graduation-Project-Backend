@@ -13,7 +13,7 @@ import (
 
 // main function to set up the HTTP server
 func main() {
-	err := database.ConnectDB()
+	GDB, err := database.ConnectDB()
 	if err != nil {
 		log.Fatalf("Kết nối database thất bại: %v", err)
 	}
