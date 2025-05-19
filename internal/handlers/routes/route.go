@@ -9,11 +9,8 @@ func SetupRouter() *mux.Router {
 
 	api := r.PathPrefix("/api").Subrouter()
 
-	user := api.PathPrefix("/users").Subrouter()
-	user.HandleFunc("/", controller.CreateUser).Methods("POST")
-	user.HandleFunc("/{id}", controller.GetUser).Methods("GET")
-	user.HandleFunc("/{id}", controller.UpdateUser).Methods("PUT")
-	user.HandleFunc("/{id}", controller.DeleteUser).Methods("DELETE")
+	SetupUserRoutes(api)
+	SetupStaticRoutes(r)
 
 	return r
 }

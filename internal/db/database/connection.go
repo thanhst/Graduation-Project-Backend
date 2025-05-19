@@ -29,7 +29,7 @@ func createDatabaseIfNotExist(user, pass, host, port, dbname string) error {
 	return err
 }
 
-func ConnectDB() (*gorm.DB, error) {
+func ConnectDB() error {
 	if err := godotenv.Load("config/.env"); err != nil {
 		fmt.Println("Warning: .env file not found!")
 	}
@@ -42,7 +42,7 @@ func ConnectDB() (*gorm.DB, error) {
 
 	err := createDatabaseIfNotExist(user, pass, host, port, dbname)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create db: %w", err)
+		return fmt.Errorf("failed to create db: %w", err)
 	}
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
@@ -51,7 +51,7 @@ func ConnectDB() (*gorm.DB, error) {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect database: %w", err)
+		return fmt.Errorf("failed to connect database: %w", err)
 	}
 
 	GDB = db
@@ -59,25 +59,26 @@ func ConnectDB() (*gorm.DB, error) {
 	schemaVer := dotenv.GetDotEnv("SCHEMA_VER")
 	schemaVerInt, err := strconv.Atoi(schemaVer)
 	if err != nil {
-		return nil, fmt.Errorf("error to convert schema version: %w", err)
+		return fmt.Errorf("error to convert schema version: %w", err)
 	}
 	if schemaVerInt == 0 {
 		err = migration.MigrateWithMigration(GDB)
 		if err != nil {
-			return nil, fmt.Errorf("error to migration: %w", err)
+			return fmt.Errorf("error to migration: %w", err)
 		}
 
 		if dotenv.GetDotEnv("APP_ENV") == "develop" {
 			if checkFlag := migration.SeedAll(GDB); !checkFlag {
-				return nil, fmt.Errorf("error to seed data")
+				return fmt.Errorf("error to seed data")
 			}
 		}
 		err = dotenv.SetDotEnv("SCHEMA_VER", "1")
 		if err != nil {
-			return nil, fmt.Errorf("error updating APP_ENV: %v", err)
+			return fmt.Errorf("error updating APP_ENV: %v", err)
 		}
+		fmt.Println("Seed success to database!")
 	}
 
 	fmt.Println("Connect success to database")
-	return GDB, nil
+	return nil
 }

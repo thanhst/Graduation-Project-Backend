@@ -144,14 +144,14 @@ var loginMethods = []string{
 }
 
 var imageUsers = []string{
-	dotenv.GetDotEnv("APP_URL") + dotenv.GetDotEnv("APP_PORT") + "/uploads/1.jpg",
-	dotenv.GetDotEnv("APP_URL") + dotenv.GetDotEnv("APP_PORT") + "/uploads/2.jpg",
-	dotenv.GetDotEnv("APP_URL") + dotenv.GetDotEnv("APP_PORT") + "/uploads/3.jpg",
-	dotenv.GetDotEnv("APP_URL") + dotenv.GetDotEnv("APP_PORT") + "/uploads/4.jpg",
-	dotenv.GetDotEnv("APP_URL") + dotenv.GetDotEnv("APP_PORT") + "/uploads/5.jpg",
-	dotenv.GetDotEnv("APP_URL") + dotenv.GetDotEnv("APP_PORT") + "/uploads/6.jpg",
-	dotenv.GetDotEnv("APP_URL") + dotenv.GetDotEnv("APP_PORT") + "/uploads/7.jpg",
-	dotenv.GetDotEnv("APP_URL") + dotenv.GetDotEnv("APP_PORT") + "/uploads/8.jpg",
+	dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/1.jpg",
+	dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/2.jpg",
+	dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/3.jpg",
+	dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/4.jpg",
+	dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/5.jpg",
+	dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/6.jpg",
+	dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/7.jpg",
+	dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/8.jpg",
 }
 
 func RandomName() string {
