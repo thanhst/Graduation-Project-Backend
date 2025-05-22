@@ -1,16 +1,22 @@
 package router
 
 import (
+	"net/http"
+	customcors "server/config"
+
 	"github.com/gorilla/mux"
 )
 
-func SetupRouter() *mux.Router {
+func SetupRouter() http.Handler {
 	r := mux.NewRouter()
 
 	api := r.PathPrefix("/api").Subrouter()
 
 	SetupUserRoutes(api)
+	SetupAuthApp(api)
 	SetupStaticRoutes(r)
 
-	return r
+	c := customcors.SetupCors()
+
+	return c.Handler(r)
 }

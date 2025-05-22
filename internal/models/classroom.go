@@ -5,13 +5,13 @@ import (
 )
 
 type Classroom struct {
-	ClassId     string    `gorm:"type:varchar(255);primaryKey;unique;not null;index"`
-	ClassName   string    `gorm:"not null;"`
-	UserCreated string    `gorm:"not null;type:varchar(255);index"`
-	Description string    `gorm:"not null"`
-	Url         string    `gorm:"not null"`
-	CreatedAt   time.Time `gorm:"autoCreateTime"`
-	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
+	ClassId     string    `gorm:"type:varchar(255);primaryKey;unique;not null;index" json:"classID"`
+	ClassName   string    `gorm:"not null;" json:"className"`
+	UserCreated string    `gorm:"not null;type:varchar(255);index" json:"userCreated"`
+	Description string    `gorm:"not null" json:"descriptions"`
+	Url         string    `gorm:"not null" json:"url"`
+	CreatedAt   time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 
 	Teacher Teacher `gorm:"foreignKey:UserCreated;references:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }

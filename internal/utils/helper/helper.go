@@ -3,6 +3,7 @@ package helper
 import (
 	"math/rand"
 	"server/internal/utils/dotenv"
+	"unicode"
 )
 
 var names = []string{
@@ -177,4 +178,20 @@ func RandomLoginMethod() string {
 
 func RandomeImagesURL() string {
 	return imageUsers[rand.Intn(len(imageUsers))]
+}
+
+func CapitalizeFirstLetter(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+
+	runes := []rune(s)
+	for i, r := range runes {
+		if unicode.IsLetter(r) {
+			runes[i] = unicode.ToUpper(r)
+			break
+		}
+	}
+
+	return string(runes)
 }

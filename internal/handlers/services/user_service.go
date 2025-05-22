@@ -2,49 +2,42 @@ package service
 
 import (
 	"errors"
-	userdao "server/internal/handlers/dao/user"
+	repository "server/internal/handlers/repositories"
 	model "server/internal/models"
 )
 
-type UserService interface {
-	GetUserByID(userID string) (*model.User, error)
-	CreateUser(user *model.User) error
-	UpdateUser(user *model.User) error
-	DeleteUser(userID string) error
+type UserService struct {
+	userRepo repository.UserRepository
 }
 
-type userServiceImpl struct {
-	userRepo userdao.UserDAO
-}
-
-func NewUserService(userRepo userdao.UserDAO) UserService {
-	return &userServiceImpl{
+func NewUserService(userRepo repository.UserRepository) *UserService {
+	return &UserService{
 		userRepo: userRepo,
 	}
 }
 
-func (s *userServiceImpl) GetUserByID(userID string) (*model.User, error) {
+func (s *UserService) GetUserByID(userID string) (*model.User, error) {
 	if userID == "" {
 		return nil, errors.New("user ID is empty")
 	}
 	return s.userRepo.GetByID(userID)
 }
 
-func (s *userServiceImpl) CreateUser(user *model.User) error {
+func (s *UserService) CreateUser(user *model.User) error {
 	if user == nil {
 		return errors.New("invalid user data")
 	}
 	return s.userRepo.Create(user)
 }
 
-func (s *userServiceImpl) UpdateUser(user *model.User) error {
+func (s *UserService) UpdateUser(user *model.User) error {
 	if user == nil || user.UserId == "" {
 		return errors.New("invalid user for update")
 	}
 	return s.userRepo.Update(user)
 }
 
-func (s *userServiceImpl) DeleteUser(userID string) error {
+func (s *UserService) DeleteUser(userID string) error {
 	if userID == "" {
 		return errors.New("user ID is empty")
 	}

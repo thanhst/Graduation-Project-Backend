@@ -1,15 +1,29 @@
 package app
 
 import (
+	"server/internal/app/container"
 	"server/internal/db/database"
 	controller "server/internal/handlers/controllers"
-	userdao "server/internal/handlers/dao/user"
-	service "server/internal/handlers/services"
 )
 
-func Setup_User_App() *controller.UserController {
-	userDAO := userdao.NewUserDAO(database.GDB)
-	userService := service.NewUserService(userDAO)
-	userController := controller.NewUserController(userService)
+var serviceContainer *container.ServiceContainer
+
+func Start() {
+	daoContainer := container.NewDAOContainer(database.GDB)
+	repoContainer := container.NewRepoContainer(daoContainer)
+	serviceContainer = container.NewServiceContainer(repoContainer)
+}
+
+func SetupUserApp() *controller.UserController {
+	userController := controller.
+		NewUserController(serviceContainer.UserService,
+			serviceContainer.AccountService)
 	return userController
+}
+
+func SetupAuthApp() *controller.AccountController {
+	accountController := controller.
+		NewAccountController(serviceContainer.AccountService,
+			serviceContainer.UserService)
+	return accountController
 }

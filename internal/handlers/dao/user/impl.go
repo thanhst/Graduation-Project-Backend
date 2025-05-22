@@ -16,7 +16,7 @@ func NewUserDAO(db *gorm.DB) UserDAO {
 
 func (dao *userDAOImpl) GetByID(userId string) (*model.User, error) {
 	var user model.User
-	if err := dao.db.First(&user, userId).Error; err != nil {
+	if err := dao.db.Where("user_id = ?", userId).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

@@ -33,11 +33,12 @@ func SeedUsers(db *gorm.DB) error {
 func SeedAccounts(db *gorm.DB, user model.User) error {
 	ctx := context.Background()
 	role := helper.RandomRole()
+	password, _ := CustomHash.HashPassword(user.FullName)
 	account := model.Account{
 		AccountId:   CustomHash.HashMD5(time.Now().String()),
 		UserId:      user.UserId,
 		Email:       helper.RandomEmail(),
-		Password:    CustomHash.HashPassword(user.FullName),
+		Password:    password,
 		Role:        role,
 		Status:      helper.RandomState(),
 		LastLogin:   nil,

@@ -5,12 +5,12 @@ import (
 )
 
 type StudentClass struct {
-	ClassId   string    `gorm:"type:varchar(255);primaryKey;not null;index"`
-	UserId    string    `gorm:"type:varchar(255);primaryKey;not null;index"`
-	State     string    `gorm:"type:enum('joined','waiting')"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	JoinedAt  time.Time `gorm:"autoUpdateTime"`
+	ClassId   string    `gorm:"type:varchar(255);primaryKey;not null;index" json:"classID"`
+	UserId    string    `gorm:"type:varchar(255);primaryKey;not null;index" json:"userID"`
+	State     string    `gorm:"type:enum('joined','waiting')" json:"state"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	JoinedAt  time.Time `gorm:"autoUpdateTime" json:"joinedAt"`
 
-	User      User      `gorm:"foreignKey:UserId;references:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	User      User      `gorm:"foreignKey:UserId;references:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"user"`
+	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"classroom"`
 }

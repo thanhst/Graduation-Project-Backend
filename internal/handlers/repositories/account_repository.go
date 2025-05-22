@@ -7,7 +7,9 @@ import (
 
 type AccountRepository interface {
 	GetByID(accountID string) (*model.Account, error)
-	GetByEmail(email string) (*model.Account, error)
+	GetByEmail(email string) ([]*model.Account, error)
+	GetByEmailAndMethod(email string, method string) (*model.Account, error)
+	GetByUserId(userId string) ([]*model.Account, error)
 	Create(account *model.Account) error
 	Update(account *model.Account) error
 	Delete(accountID string) error
@@ -25,8 +27,15 @@ func (r *accountRepository) GetByID(accountID string) (*model.Account, error) {
 	return r.accountDAO.GetByID(accountID)
 }
 
-func (r *accountRepository) GetByEmail(email string) (*model.Account, error) {
+func (r *accountRepository) GetByEmail(email string) ([]*model.Account, error) {
 	return r.accountDAO.GetByEmail(email)
+}
+
+func (r *accountRepository) GetByEmailAndMethod(email string, method string) (*model.Account, error) {
+	return r.accountDAO.GetByEmailAndMethod(email, method)
+}
+func (r *accountRepository) GetByUserId(userId string) ([]*model.Account, error) {
+	return r.accountDAO.GetByUserId(userId)
 }
 
 func (r *accountRepository) Create(account *model.Account) error {
