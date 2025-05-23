@@ -193,7 +193,7 @@ func (ac *AccountController) CheckAuth(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ac *AccountController) GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
+func (ac *AccountController) LoginWithGoogle(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Token string `json:"token"`
 	}
@@ -218,15 +218,42 @@ func (ac *AccountController) GoogleLoginHandler(w http.ResponseWriter, r *http.R
 		http.Error(w, "Email claim missing", http.StatusUnauthorized)
 		return
 	}
-	// name, ok := payload.Claims["name"].(string)
-	// if !ok {
-	// 	name = "UserGoogle"
-	// }
+	name, ok := payload.Claims["name"].(string)
+	if !ok {
+		name = "UserGoogle"
+	}
 	//check account by email. And create user if necessary
-	jwtToken, err := jwtutil.CreateToken(email, jwtutil.GetAccessToken(), jwtutil.GetAccessExpire())
-	refreshToken, err := jwtutil.CreateToken(email, jwtutil.GetRefreshToken(), jwtutil.GetRefreshExpire())
-
-	helper.SetTokenCookies(w, jwtToken, refreshToken, jwtutil.GetAccessExpire().String(), jwtutil.GetRefreshExpire().String())
-
-	json.NewEncoder(w).Encode(map[string]string{})
+	var user *model.User
+	if accounts, _ := ac.accountService.GetFullAccountWithEmail(email); len(accounts) == 0 {
+		user = &model.User{
+			UserId:         CustomHash.HashMD5(time.Now().String()),
+			FullName:       name,
+			ProfilePicture: helper.RandomeImagesURL(),
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		}
+		ac.userService.CreateUser(user)
+	} else {
+		user = &accounts[0].User
+	}
+	Account := &model.Account{
+		UserId:      user.UserId,
+		Email:       email,
+		LoginMethod: "google",
+	}
+	if tokens, err := ac.accountService.LoginWithGoogle(Account); err == nil {
+		helper.SetTokenCookies(w, tokens["access_token"], tokens["refresh_token"], tokens["access_exprise"], tokens["refresh_exprise"])
+		w.Header().Set("Content-Type", "application/json")
+		response := map[string]interface{}{
+			"user_id":         tokens["user_id"],
+			"role":            tokens["role"],
+			"last_login":      tokens["last_login"],
+			"access_exprise":  tokens["access_exprise"],
+			"refresh_exprise": tokens["refresh_exprise"],
+		}
+		json.NewEncoder(w).Encode(response)
+	} else {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 }

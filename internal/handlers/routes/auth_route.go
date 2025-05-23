@@ -16,4 +16,5 @@ func SetupAuthApp(r *mux.Router) {
 	auth.HandleFunc("/logout", authController.Logout).Methods("POST")
 	auth.HandleFunc("/refresh-token", authController.RefreshToken).Methods("POST")
 	auth.HandleFunc("/check", authController.CheckAuth).Methods("GET")
+	auth.HandleFunc("/google", authController.LoginWithGoogle).Methods("Post")
 }

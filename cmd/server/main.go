@@ -16,6 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Kết nối database thất bại: %v", err)
 	}
+	fmt.Println("***GORM with first,last,... error record not found! GORM with find doesn't have this error (Return array object len == 0)***")
 	app.Start()
 
 	port := dotenv.GetDotEnv("APP_PORT")
