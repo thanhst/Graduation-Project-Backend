@@ -12,6 +12,8 @@ type StudentClassRepository interface {
 	JoinClass(sc *model.StudentClass) error
 	Update(sc *model.StudentClass) error
 	Delete(userID, classID string) error
+	GetClassroomsByUser(userId string, limit int, offset int) ([]*model.Classroom, error)
+	GetCountClassroomsByUser(userId string) (int64, error)
 }
 
 type studentClassRepository struct {
@@ -44,4 +46,11 @@ func (r *studentClassRepository) Update(sc *model.StudentClass) error {
 
 func (r *studentClassRepository) Delete(userID, classID string) error {
 	return r.dao.Delete(userID, classID)
+}
+
+func (r *studentClassRepository) GetClassroomsByUser(userId string, limit int, offset int) ([]*model.Classroom, error) {
+	return r.dao.GetClassroomsByUser(userId, limit, offset)
+}
+func (r *studentClassRepository) GetCountClassroomsByUser(userId string) (int64, error) {
+	return r.dao.GetCountClassroomsByUser(userId)
 }

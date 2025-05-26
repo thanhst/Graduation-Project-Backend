@@ -13,5 +13,8 @@ type Classroom struct {
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 
-	Teacher Teacher `gorm:"foreignKey:UserCreated;references:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Teacher        Teacher        `gorm:"foreignKey:UserCreated;references:UserId;"`
+	User           User           `gorm:"foreignKey:UserCreated;references:UserId;"`
+	StudentClasses []StudentClass `gorm:"foreignKey:ClassId;references:ClassId;"`
+	Schedulers     []Scheduler    `gorm:"foreignKey:ClassId;references:ClassId"`
 }

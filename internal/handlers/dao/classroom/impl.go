@@ -20,17 +20,18 @@ func (dao *classroomDAOImpl) GetByID(classID string) (*model.Classroom, error) {
 	return &classroom, err
 }
 
-func (dao *classroomDAOImpl) GetAll() ([]model.Classroom, error) {
-	var classrooms []model.Classroom
+func (dao *classroomDAOImpl) GetAll() ([]*model.Classroom, error) {
+	var classrooms []*model.Classroom
 	err := dao.db.Preload("Teacher").Find(&classrooms).Error
 	return classrooms, err
 }
 
-func (dao *classroomDAOImpl) GetByTeacherID(teacherID string, limit int, offset int) ([]model.Classroom, error) {
-	var classrooms []model.Classroom
+func (dao *classroomDAOImpl) GetByTeacherID(teacherID string, limit int, offset int) ([]*model.Classroom, error) {
+	var classrooms []*model.Classroom
 	err := dao.db.
 		Where("user_created = ?", teacherID).
-		Preload("Teacher").
+		Preload("User").
+		Preload("StudentClasses").Preload("StudentClasses.User").
 		Limit(limit).
 		Offset(offset).
 		Find(&classrooms).Error
@@ -47,4 +48,13 @@ func (dao *classroomDAOImpl) Update(classroom *model.Classroom) error {
 
 func (dao *classroomDAOImpl) Delete(classID string) error {
 	return dao.db.Delete(&model.Classroom{}, "class_id = ?", classID).Error
+}
+
+func (dao *classroomDAOImpl) GetCountClassroomsByUser(userId string) (int64, error) {
+	var count int64
+	err := dao.db.Model(&model.Classroom{}).Where("user_created = ?", userId).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

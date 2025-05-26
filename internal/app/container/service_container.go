@@ -7,12 +7,12 @@ type ServiceContainer struct {
 	AccountService *service.AccountService
 	// RoomService         service.RoomService
 	// StudentService      service.StudentService
-	// StudentClassService service.StudentClassService
+	StudentClassService service.StudentClassService
 	// NotificationService service.NotificationService
 	// SchedulerService    service.SchedulerService
 	// TeacherService      service.TeacherService
 	// EmotionService      service.EmotionService
-	// ClassroomService    service.ClassroomService
+	ClassroomService service.ClassService
 }
 
 func NewServiceContainer(repoContainer *RepoContainer) *ServiceContainer {
@@ -21,11 +21,11 @@ func NewServiceContainer(repoContainer *RepoContainer) *ServiceContainer {
 		AccountService: service.NewAccountService(repoContainer.AccountRepo),
 		// RoomService:         service.NewRoomService(repoContainer.RoomRepo),
 		// StudentService:      service.NewStudentService(repoContainer.StudentRepo),
-		// StudentClassService: service.NewStudentClassService(repoContainer.StudentClassRepo),
+		StudentClassService: *service.NewStudentClassService(repoContainer.StudentClassRepo),
 		// NotificationService: service.NewNotificationService(repoContainer.NotificationRepo),
 		// SchedulerService:    service.NewSchedulerService(repoContainer.SchedulerRepo),
 		// TeacherService:      service.NewTeacherService(repoContainer.TeacherRepo),
 		// EmotionService:      service.NewEmotionService(repoContainer.EmotionRepo),
-		// ClassroomService:    service.NewClassroomService(repoContainer.ClassroomRepo),
+		ClassroomService: *service.NewClassService(repoContainer.ClassroomRepo),
 	}
 }

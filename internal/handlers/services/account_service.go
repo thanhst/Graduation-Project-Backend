@@ -1,20 +1,22 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"server/internal/handlers/dto"
 	repository "server/internal/handlers/repositories"
 	model "server/internal/models"
+	"server/internal/utils/dotenv"
 	CustomHash "server/internal/utils/hash"
 	jwtutil "server/internal/utils/jwt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/github"
 	"gorm.io/gorm"
 )
 
@@ -87,7 +89,7 @@ func (s *AccountService) Login(input *model.Account) (map[string]string, error) 
 		return nil, errors.New("invalid email or password")
 	}
 
-	if CustomHash.CheckPassword(Account.Password, input.Password) {
+	if !CustomHash.CheckPassword(Account.Password, input.Password) {
 		return nil, errors.New("password is incorrect")
 	}
 	Account.Status = "online"
@@ -139,13 +141,6 @@ func (s *AccountService) Logout(userId *string) error {
 	return nil
 }
 
-func (ac *AccountService) Update(account *model.Account) bool {
-	if err := ac.accountRepo.Update(account); err != nil {
-		return false
-	}
-	return true
-}
-
 func (s *AccountService) LoginWithGoogle(input *model.Account) (map[string]string, error) {
 	Account, err := s.accountRepo.GetByEmailAndMethod(input.Email, input.LoginMethod)
 	if err != nil || Account.AccountId == "" {
@@ -195,37 +190,96 @@ func (s *AccountService) LoginWithGoogle(input *model.Account) (map[string]strin
 	}, nil
 }
 
-func (s *AccountService) LoginWithGitHub(accessToken string) (*dto.GitHubUserResponse, error) {
-	if accessToken == "" {
-		return nil, errors.New("access token is empty")
+func (s *AccountService) LoginWithGithub(state *dto.GitHubUserRequest) string {
+	var githubOAuthConfig = &oauth2.Config{
+		ClientID:     dotenv.GetDotEnv("GITHUB_CLIENT_ID"),
+		ClientSecret: dotenv.GetDotEnv("GITHUB_CLIENT_SECRET"),
+		RedirectURL:  dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/api/auth/github/callback",
+		Scopes:       []string{"user", "user:email"},
+		Endpoint:     github.Endpoint,
+	}
+	claims := jwt.MapClaims{
+		"redirect_uri": state.RedirectURI,
+		"nonce":        state.Nonce,
+		"exp":          state.ExpiresAt,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedState, err := token.SignedString([]byte(jwtutil.GetAccessToken()))
+	if err != nil {
+		return ""
 	}
 
-	url := "https://api.github.com/user"
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
+	url := githubOAuthConfig.AuthCodeURL(signedState)
+	return url
+}
+
+func (s *AccountService) GitHubCallback(code string) (*dto.GitHubUserResponse, error) {
+	githubOAuthConfig := &oauth2.Config{
+		ClientID:     dotenv.GetDotEnv("GITHUB_CLIENT_ID"),
+		ClientSecret: dotenv.GetDotEnv("GITHUB_CLIENT_SECRET"),
+		RedirectURL:  dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/api/auth/github/callback",
+		Scopes:       []string{"user", "user:email"},
+		Endpoint:     github.Endpoint,
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("token %s", accessToken))
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	token, err := githubOAuthConfig.Exchange(context.Background(), code)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to exchange code for token: %v", err)
+	}
+
+	client := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(token))
+
+	resp, err := client.Get("https://api.github.com/user")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user info: %v", err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("failed to get github user info: %s", string(bodyBytes))
-	}
-
 	var user dto.GitHubUserResponse
-	err = json.NewDecoder(resp.Body).Decode(&user)
-	if err != nil {
-		return nil, err
+	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+		return nil, fmt.Errorf("failed to decode user info: %v", err)
 	}
 
-	// chưa thêm login vào đây này!
+	respEmail, err := client.Get("https://api.github.com/user/emails")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user emails: %v", err)
+	}
+	defer respEmail.Body.Close()
+
+	var emails []struct {
+		Email    string `json:"email"`
+		Primary  bool   `json:"primary"`
+		Verified bool   `json:"verified"`
+	}
+	if err := json.NewDecoder(respEmail.Body).Decode(&emails); err != nil {
+		return nil, fmt.Errorf("failed to decode email info: %v", err)
+	}
+
+	for _, e := range emails {
+		if e.Primary && e.Verified {
+			user.Email = e.Email
+			break
+		}
+	}
 	return &user, nil
+}
+
+func (ac *AccountService) GetAccountByEmailAndMethod(email string, method string) (*model.Account, error) {
+	return ac.accountRepo.GetByEmailAndMethod(email, method)
+}
+func (ac *AccountService) GetAccountsByUser(userId string) ([]*model.Account, error) {
+	return ac.accountRepo.GetByUserId(userId)
+}
+
+func (ac *AccountService) Create(account *model.Account) error {
+	return ac.accountRepo.Create(account)
+}
+func (ac *AccountService) Update(account *model.Account) bool {
+	if err := ac.accountRepo.Update(account); err != nil {
+		return false
+	}
+	return true
+}
+func (ac *AccountService) Delete(accountId string) error {
+	return ac.accountRepo.Delete(accountId)
 }

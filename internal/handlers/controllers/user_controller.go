@@ -105,7 +105,7 @@ func (userController *UserController) UpdateUser(w http.ResponseWriter, r *http.
 			}
 		}
 
-		user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + strconv.Itoa(rand.IntN(8)) + ".jpg"
+		user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/" + strconv.Itoa(rand.IntN(8)) + ".jpg"
 		// http.Error(w, "Cannot get image: "+err.Error(), http.StatusBadRequest)
 		// return
 	}

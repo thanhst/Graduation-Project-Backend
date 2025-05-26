@@ -14,6 +14,7 @@ func SetupRouter() http.Handler {
 
 	SetupUserRoutes(api)
 	SetupAuthApp(api)
+	SetupClassroomApp(api)
 	SetupStaticRoutes(r)
 
 	c := customcors.SetupCors()

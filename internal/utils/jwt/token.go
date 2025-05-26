@@ -47,7 +47,6 @@ func init() {
 
 type CustomClaims struct {
 	UserID string `json:"user_id"`
-	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
