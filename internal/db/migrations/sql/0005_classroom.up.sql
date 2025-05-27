@@ -8,7 +8,7 @@ CREATE TABLE classrooms (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_classroom_teacher FOREIGN KEY (user_created)
-        REFERENCES teachers(user_id)
+        REFERENCES users(user_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );

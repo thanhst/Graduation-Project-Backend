@@ -14,13 +14,7 @@ func SetupClassroomApp(r *mux.Router) {
 
 	studentController := app.SetupStudentClassApp()
 	classController := app.SetupClassroomApp()
-	// classroom.Handle("/user/{id}/alls", middleware.RoleSwitchMiddleware(
-	// 	app.ServiceContainer.AccountService,
-	// 	map[string]http.HandlerFunc{
-	// 		"student": studentController.GetClassroomsWithUser,
-	// 		"teacher": classController.GetClassroomsByUser,
-	// 	},
-	// )).Methods("GET")
+
 	classroom.Handle("/user/{id}", middleware.RoleSwitchMiddleware(
 		app.ServiceContainer.AccountService,
 		map[string]http.HandlerFunc{
@@ -35,4 +29,29 @@ func SetupClassroomApp(r *mux.Router) {
 			"teacher": classController.GetCountClassroomsByUser,
 		},
 	)).Methods("GET")
+	classroom.Handle("/user/{id}/newest", middleware.RoleSwitchMiddleware(
+		app.ServiceContainer.AccountService,
+		map[string]http.HandlerFunc{
+			"student": studentController.GetClassroomsWithNewScheduler,
+			"teacher": classController.GetClassroomsWithNewScheduler,
+		},
+	)).Methods("GET")
+	classroom.Handle("/create", middleware.RoleSwitchMiddleware(
+		app.ServiceContainer.AccountService,
+		map[string]http.HandlerFunc{
+			"teacher": classController.Create,
+		},
+	)).Methods("POST")
+	classroom.Handle("/{id}/update", middleware.RoleSwitchMiddleware(
+		app.ServiceContainer.AccountService,
+		map[string]http.HandlerFunc{
+			"teacher": classController.Update,
+		},
+	)).Methods("PUT")
+	classroom.Handle("/{id}/delete", middleware.RoleSwitchMiddleware(
+		app.ServiceContainer.AccountService,
+		map[string]http.HandlerFunc{
+			"teacher": classController.Delete,
+		},
+	)).Methods("DELETE")
 }

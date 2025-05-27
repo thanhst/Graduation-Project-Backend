@@ -22,3 +22,15 @@ func (s *ClassService) GetClassroomsByUser(userId string, limit int, offset int)
 func (s *ClassService) GetCountClassroomsByUser(userId string) (int64, error) {
 	return s.classRepo.GetCountClassroomsByUser(userId)
 }
+func (s *ClassService) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
+	return s.classRepo.GetClassroomsWithNewScheduler(userId)
+}
+func (s *ClassService) Create(classroom *model.Classroom) error {
+	return s.classRepo.Create(classroom)
+}
+func (s *ClassService) Update(classroom *model.Classroom) error {
+	return s.classRepo.Update(classroom)
+}
+func (s *ClassService) Delete(classId string) error {
+	return s.classRepo.Delete(classId)
+}

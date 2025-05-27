@@ -10,4 +10,5 @@ type ClassroomDAO interface {
 	Update(classroom *model.Classroom) error
 	Delete(classID string) error
 	GetCountClassroomsByUser(userId string) (int64, error)
+	GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error)
 }

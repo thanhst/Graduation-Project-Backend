@@ -82,3 +82,14 @@ func (st *StudentClassController) GetCountClassroomsByUser(w http.ResponseWriter
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(count)
 }
+func (st *StudentClassController) GetClassroomsWithNewScheduler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["id"]
+	classrooms, err := st.stclsService.GetClassroomsWithNewScheduler(userId)
+	if err != nil {
+		http.Error(w, "Error to get classrooms", http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(classrooms)
+}

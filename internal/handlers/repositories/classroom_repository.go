@@ -13,6 +13,7 @@ type ClassroomRepository interface {
 	Update(classroom *model.Classroom) error
 	Delete(classID string) error
 	GetCountClassroomsByUser(userId string) (int64, error)
+	GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error)
 }
 type classroomRepository struct {
 	classroomDAO classroomdao.ClassroomDAO
@@ -48,4 +49,7 @@ func (r *classroomRepository) Delete(classID string) error {
 
 func (r *classroomRepository) GetCountClassroomsByUser(userId string) (int64, error) {
 	return r.classroomDAO.GetCountClassroomsByUser(userId)
+}
+func (r *classroomRepository) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
+	return r.classroomDAO.GetClassroomsWithNewScheduler(userId)
 }

@@ -105,7 +105,7 @@ func (userController *UserController) UpdateUser(w http.ResponseWriter, r *http.
 			}
 		}
 
-		user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/" + strconv.Itoa(rand.IntN(8)) + ".jpg"
+		user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/" + strconv.Itoa(rand.IntN(8)+1) + ".jpg"
 		// http.Error(w, "Cannot get image: "+err.Error(), http.StatusBadRequest)
 		// return
 	}
@@ -133,6 +133,7 @@ func (userController *UserController) UpdateUser(w http.ResponseWriter, r *http.
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"user":       user,
+			"role":       role,
 			"last_login": time.Now().String(),
 		})
 	} else {

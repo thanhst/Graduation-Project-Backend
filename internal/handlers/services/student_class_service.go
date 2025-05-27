@@ -20,6 +20,9 @@ func (stcls *StudentClassService) GetClassroomsByUser(userId string, limit int, 
 func (stcls *StudentClassService) GetCountClassroomsByUser(userId string) (int64, error) {
 	return stcls.studentClassRepo.GetCountClassroomsByUser(userId)
 }
+func (stcls *StudentClassService) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
+	return stcls.studentClassRepo.GetClassroomsWithNewScheduler(userId)
+}
 
 // func (stcls *StudentClassService) GetAllClassroomsByUser(userId string) (int64, error) {
 // 	return stcls.studentClassRepo.GetAllClassroomsByUser(userId)

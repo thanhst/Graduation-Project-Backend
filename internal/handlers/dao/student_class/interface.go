@@ -15,4 +15,5 @@ type StudentClassDAO interface {
 	GetAllClassroomsByUser(userId string) ([]*model.Classroom, error)
 	GetClassroomsByUser(userId string, limit int, offset int) ([]*model.Classroom, error)
 	GetCountClassroomsByUser(userId string) (int64, error)
+	GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error)
 }

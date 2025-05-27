@@ -14,6 +14,7 @@ type StudentClassRepository interface {
 	Delete(userID, classID string) error
 	GetClassroomsByUser(userId string, limit int, offset int) ([]*model.Classroom, error)
 	GetCountClassroomsByUser(userId string) (int64, error)
+	GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error)
 }
 
 type studentClassRepository struct {
@@ -53,4 +54,7 @@ func (r *studentClassRepository) GetClassroomsByUser(userId string, limit int, o
 }
 func (r *studentClassRepository) GetCountClassroomsByUser(userId string) (int64, error) {
 	return r.dao.GetCountClassroomsByUser(userId)
+}
+func (r *studentClassRepository) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
+	return r.dao.GetClassroomsWithNewScheduler(userId)
 }

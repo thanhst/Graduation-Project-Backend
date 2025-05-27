@@ -58,3 +58,26 @@ func (dao *classroomDAOImpl) GetCountClassroomsByUser(userId string) (int64, err
 	}
 	return count, nil
 }
+func (dao *classroomDAOImpl) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
+	var classrooms []*model.Classroom
+
+	query := `
+    SELECT DISTINCT c.*
+	FROM classrooms c
+	LEFT JOIN (
+		SELECT s1.class_id, MIN(s1.start_time) AS nearest_start
+		FROM schedulers s1
+		WHERE DATE(s1.start_time) = CURDATE()  -- chỉ lấy lịch học trong hôm nay
+		GROUP BY s1.class_id
+	) smin ON smin.class_id = c.class_id
+	WHERE c.user_created = ?
+	AND smin.nearest_start IS NOT NULL;
+    `
+
+	err := dao.db.Raw(query, userId).Scan(&classrooms).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return classrooms, nil
+}

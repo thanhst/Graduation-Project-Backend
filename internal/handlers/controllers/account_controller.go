@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"server/internal/handlers/dto"
+	middleware "server/internal/handlers/middlewares"
 	service "server/internal/handlers/services"
 	model "server/internal/models"
 	"server/internal/utils/dotenv"
@@ -55,6 +56,8 @@ func (ac *AccountController) Register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		registerRequest.Account.UserId = existingUserId
+		registerRequest.Account.LastLogin = accounts[0].LastLogin
+		registerRequest.Account.Role = accounts[0].Role
 		err := ac.accountService.Register(&registerRequest.Account)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
@@ -123,12 +126,28 @@ func (ac *AccountController) Login(w http.ResponseWriter, r *http.Request) {
 
 func (ac *AccountController) Logout(w http.ResponseWriter, r *http.Request) {
 	var data map[string]interface{}
-	var userId string
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
-	userId = data["userId"].(string)
+	userIdRaw, ok := data["userId"]
+	if !ok {
+		userID := r.Context().Value(middleware.UserIDKey).(string)
+		err := ac.accountService.Logout(&userID)
+		if err != nil {
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": "Opps! Server have error!",
+			})
+		}
+		helper.RemoveCookies(w)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": "Missing userId in request data!",
+		})
+		return
+	}
+	userId, _ := userIdRaw.(string)
 	if userId != "" {
 		err := ac.accountService.Logout(&userId)
 		if err != nil {
@@ -226,7 +245,12 @@ func (ac *AccountController) LoginWithGoogle(w http.ResponseWriter, r *http.Requ
 	}
 	//check account by email. And create user if necessary
 	var user *model.User
-	if accounts, _ := ac.accountService.GetFullAccountWithEmail(email); len(accounts) == 0 {
+	var lastLogin *time.Time
+	var role string
+	accounts, _ := ac.accountService.GetFullAccountWithEmail(email)
+	if len(accounts) == 0 {
+		lastLogin = nil
+		role = "student"
 		user = &model.User{
 			UserId:         CustomHash.HashMD5(time.Now().String()),
 			FullName:       name,
@@ -236,12 +260,16 @@ func (ac *AccountController) LoginWithGoogle(w http.ResponseWriter, r *http.Requ
 		}
 		ac.userService.CreateUser(user)
 	} else {
+		lastLogin = accounts[0].LastLogin
+		role = accounts[0].Role
 		user = &accounts[0].User
 	}
 	Account := &model.Account{
 		UserId:      user.UserId,
 		Email:       email,
 		LoginMethod: "google",
+		LastLogin:   lastLogin,
+		Role:        role,
 	}
 
 	if tokens, err := ac.accountService.LoginWithGoogle(Account); err == nil {
@@ -306,10 +334,9 @@ func (a *AccountController) GitHubCallback(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	if accounts, err := a.accountService.GetFullAccountWithEmail(user.Email); err == nil {
-		now := time.Now()
 		account, _ := a.accountService.GetAccountByEmailAndMethod(user.Email, "github")
+		account.Status = "online"
 		if account.AccountId != "" {
-			account.Status = "online"
 			if !a.accountService.Update(account) {
 				http.Error(w, "Error for create account github", http.StatusInternalServerError)
 				return
@@ -320,14 +347,14 @@ func (a *AccountController) GitHubCallback(w http.ResponseWriter, r *http.Reques
 			account.CreatedAt = time.Now()
 			account.UpdatedAt = time.Now()
 			account.LoginMethod = "github"
-			account.LastLogin = &now
 			if len(accounts) > 0 {
 				account.UserId = accounts[0].UserId
 				account.Role = accounts[0].Role
+				account.LastLogin = accounts[0].LastLogin
 			} else {
 				userDB := model.User{
 					UserId:         CustomHash.HashMD5(time.Now().String()),
-					FullName:       "",
+					FullName:       user.Name,
 					ProfilePicture: helper.RandomeImagesURL(),
 					CreatedAt:      time.Now(),
 					UpdatedAt:      time.Now(),

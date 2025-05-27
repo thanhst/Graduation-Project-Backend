@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	service "server/internal/handlers/services"
+	model "server/internal/models"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -20,8 +21,48 @@ func NewClassroomController(cls *service.ClassService) *ClassroomController {
 func (cls *ClassroomController) GetAllClassroomsByUser(w http.ResponseWriter, r *http.Request) {
 
 }
-func (cls *ClassroomController) UpdateClass(w http.ResponseWriter, r *http.Request) {}
-func (cls *ClassroomController) DeleteClass(w http.ResponseWriter, r *http.Request) {}
+func (cls *ClassroomController) Create(w http.ResponseWriter, r *http.Request) {
+	var classroom model.Classroom
+	if err := json.NewDecoder(r.Body).Decode(&classroom); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	err := cls.classService.Create(&classroom)
+	if err != nil {
+		http.Error(w, "Error to create classroom", http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(classroom)
+}
+
+func (cls *ClassroomController) Update(w http.ResponseWriter, r *http.Request) {
+	var classroom model.Classroom
+	if err := json.NewDecoder(r.Body).Decode(&classroom); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	err := cls.classService.Update(&classroom)
+	if err != nil {
+		http.Error(w, "Error to update classroom", http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(classroom)
+}
+func (cls *ClassroomController) Delete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	classId := vars["id"]
+	err := cls.classService.Delete(classId)
+	if err != nil {
+		http.Error(w, "Error to delete classroom", http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Success to delete classroom with Id : " + classId,
+	})
+}
 func (cls *ClassroomController) GetClassroomsByUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["id"]
@@ -72,4 +113,15 @@ func (cls *ClassroomController) GetCountClassroomsByUser(w http.ResponseWriter, 
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(count)
+}
+func (cls *ClassroomController) GetClassroomsWithNewScheduler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["id"]
+	classrooms, err := cls.classService.GetClassroomsWithNewScheduler(userId)
+	if err != nil {
+		http.Error(w, "Error to get classrooms", http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(classrooms)
 }

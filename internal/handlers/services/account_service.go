@@ -53,33 +53,46 @@ func (s *AccountService) GetFullAccountWithUser(userId string) ([]*model.Account
 }
 
 func (s *AccountService) Register(account *model.Account) error {
-	log.Println("Register")
-	_, err := s.accountRepo.GetByEmailAndMethod(account.Email, account.LoginMethod)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			hash, err := CustomHash.HashPassword(account.Password)
-			if err != nil {
-				return errors.New("cannot hash the password")
+	accounts, err := s.accountRepo.GetByEmail(account.Email)
+	if err == nil {
+		_, err := s.accountRepo.GetByEmailAndMethod(account.Email, account.LoginMethod)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				hash, err := CustomHash.HashPassword(account.Password)
+				if err != nil {
+					return errors.New("cannot hash the password")
+				}
+				var lastLogin *time.Time
+				var role string
+				if len(accounts) > 0 {
+					lastLogin = accounts[0].LastLogin
+					role = accounts[0].Role
+				} else {
+					lastLogin = nil
+					role = "student"
+				}
+				Account := &model.Account{
+					AccountId:   CustomHash.HashMD5(time.Now().String()),
+					UserId:      account.UserId,
+					Email:       account.Email,
+					Password:    string(hash),
+					Role:        role,
+					Status:      "offline",
+					LastLogin:   lastLogin,
+					LoginMethod: account.LoginMethod,
+					CreatedAt:   account.CreatedAt,
+					UpdatedAt:   account.UpdatedAt,
+				}
+				return s.accountRepo.Create(Account)
+			} else {
+				return errors.New("oops!! Server is error. Sorry")
 			}
-			Account := &model.Account{
-				AccountId:   CustomHash.HashMD5(time.Now().String()),
-				UserId:      account.UserId,
-				Email:       account.Email,
-				Password:    string(hash),
-				Role:        "student",
-				Status:      "offline",
-				LastLogin:   nil,
-				LoginMethod: account.LoginMethod,
-				CreatedAt:   account.CreatedAt,
-				UpdatedAt:   account.UpdatedAt,
-			}
-			return s.accountRepo.Create(Account)
 		} else {
-			return errors.New("oops!! Server is error. Sorry")
+			log.Println("User existing!")
+			return errors.New("email already registered")
 		}
 	} else {
-		log.Println("User existing!")
-		return errors.New("email already registered")
+		return errors.New("can't connect to server")
 	}
 }
 
@@ -147,10 +160,10 @@ func (s *AccountService) LoginWithGoogle(input *model.Account) (map[string]strin
 		Account.UserId = input.UserId
 		Account.CreatedAt = time.Now()
 		Account.UpdatedAt = time.Now()
-		Account.LastLogin = nil
+		Account.LastLogin = input.LastLogin
 		Account.AccountId = CustomHash.HashMD5(time.Now().String())
 		Account.Email = input.Email
-		Account.Role = "student"
+		Account.Role = input.Role
 		Account.Status = "online"
 		Account.LoginMethod = "google"
 		if err := s.accountRepo.Create(Account); err != nil {
