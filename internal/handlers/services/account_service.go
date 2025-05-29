@@ -125,15 +125,15 @@ func (s *AccountService) Login(input *model.Account) (map[string]string, error) 
 	} else {
 		last_login = LastLogin.String()
 	}
-
 	return map[string]string{
 		"access_token":    accessToken,
 		"refresh_token":   refreshToken,
 		"user_id":         Account.UserId,
 		"role":            Account.Role,
 		"last_login":      last_login,
-		"access_exprise":  time.Now().Add(jwtutil.GetAccessExpire()).String(),
-		"refresh_exprise": time.Now().Add(jwtutil.GetRefreshExpire()).String(),
+		"login_method":    Account.LoginMethod,
+		"access_exprise":  time.Now().Add(jwtutil.GetAccessExpire()).UTC().Format(time.RFC3339),
+		"refresh_exprise": time.Now().Add(jwtutil.GetRefreshExpire()).UTC().Format(time.RFC3339),
 	}, nil
 }
 
@@ -198,8 +198,9 @@ func (s *AccountService) LoginWithGoogle(input *model.Account) (map[string]strin
 		"user_id":         Account.UserId,
 		"role":            Account.Role,
 		"last_login":      last_login,
-		"access_exprise":  time.Now().Add(jwtutil.GetAccessExpire()).String(),
-		"refresh_exprise": time.Now().Add(jwtutil.GetRefreshExpire()).String(),
+		"login_method":    Account.LoginMethod,
+		"access_exprise":  time.Now().Add(jwtutil.GetAccessExpire()).UTC().Format(time.RFC3339),
+		"refresh_exprise": time.Now().Add(jwtutil.GetRefreshExpire()).UTC().Format(time.RFC3339),
 	}, nil
 }
 

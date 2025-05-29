@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	customcors "server/config"
+	websocket "server/internal/handlers/websocket"
 
 	"github.com/gorilla/mux"
 )
@@ -16,6 +17,7 @@ func SetupRouter() http.Handler {
 	SetupAuthApp(api)
 	SetupClassroomApp(api)
 	SetupStaticRoutes(r)
+	websocket.SetupWebsocket(r)
 
 	c := customcors.SetupCors()
 

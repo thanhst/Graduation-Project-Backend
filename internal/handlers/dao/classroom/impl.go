@@ -81,3 +81,12 @@ func (dao *classroomDAOImpl) GetClassroomsWithNewScheduler(userId string) ([]*mo
 
 	return classrooms, nil
 }
+
+func (dao *classroomDAOImpl) GetTeacherFromClass(classId string) (*model.User, error) {
+	var classroom model.Classroom
+	err := dao.db.Where("class_id = ?", classId).Preload("User").Find(&classroom).Error
+	if err != nil {
+		return nil, err
+	}
+	return &classroom.User, nil
+}

@@ -50,8 +50,8 @@ func (dao *studentClassDAOImpl) Update(sc *model.StudentClass) error {
 	return dao.db.Save(sc).Error
 }
 
-func (dao *studentClassDAOImpl) Delete(userID, classID string) error {
-	return dao.db.Where("user_id = ? AND class_id = ?", userID, classID).
+func (dao *studentClassDAOImpl) Delete(sc *model.StudentClass) error {
+	return dao.db.Where("user_id = ? AND class_id = ?", sc.UserId, sc.ClassId).
 		Delete(&model.StudentClass{}).Error
 }
 func (dao *studentClassDAOImpl) GetAllClassroomsByUser(userId string) ([]*model.Classroom, error) {
@@ -172,4 +172,63 @@ func (dao *studentClassDAOImpl) GetClassroomsWithNewScheduler(userId string) ([]
 		return nil, err
 	}
 	return classrooms, nil
+}
+
+func (dao *studentClassDAOImpl) GetUserJoinedWithClassrooms(classId string, limit int, offset int) ([]*model.User, error) {
+	var studentClasses []*model.StudentClass
+	err := dao.db.
+		Where("class_id = ? and state = ?", classId, "joined").
+		Preload("User").
+		Limit(limit).Offset(offset).
+		Order("created_at DESC").
+		Find(&studentClasses).Error
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*model.User, 0, len(studentClasses))
+	for _, sc := range studentClasses {
+		users = append(users, &sc.User)
+	}
+	return users, nil
+}
+func (dao *studentClassDAOImpl) GetUserWaitingWithClassrooms(classId string, limit int, offset int) ([]*model.User, error) {
+	var studentClasses []*model.StudentClass
+	err := dao.db.
+		Where("class_id = ? and state = ?", classId, "waiting").
+		Preload("User").
+		Limit(limit).Offset(offset).
+		Order("created_at DESC").
+		Find(&studentClasses).Error
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*model.User, 0, len(studentClasses))
+	for _, sc := range studentClasses {
+		users = append(users, &sc.User)
+	}
+	return users, nil
+}
+
+func (dao *studentClassDAOImpl) GetCountUsersByClassroom(userId string) (int64, int64, error) {
+	var countJoined, countWaiting int64
+	err := dao.db.Model(&model.StudentClass{}).Where("class_id = ? and state = ?", userId, "joined").Count(&countJoined).Error
+	errW := dao.db.Model(&model.StudentClass{}).Where("class_id = ? and state = ?", userId, "waiting").Count(&countWaiting).Error
+
+	if err != nil {
+		return 0, 0, err
+	}
+	if errW != nil {
+		return 0, 0, err
+	}
+	return countJoined, countWaiting, nil
+}
+func (dao *studentClassDAOImpl) GetInfo(classId string, userId string) (*model.StudentClass, error) {
+	var stdCls model.StudentClass
+	err := dao.db.Where("class_id = ? and user_id = ?", classId, userId).
+		Preload("User").
+		Preload("Classroom").Find(&stdCls).Error
+	if err != nil {
+		return nil, err
+	}
+	return &stdCls, err
 }

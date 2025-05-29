@@ -11,10 +11,14 @@ type StudentClassRepository interface {
 	ListByClass(classID string) ([]model.StudentClass, error)
 	JoinClass(sc *model.StudentClass) error
 	Update(sc *model.StudentClass) error
-	Delete(userID, classID string) error
+	Delete(sc *model.StudentClass) error
 	GetClassroomsByUser(userId string, limit int, offset int) ([]*model.Classroom, error)
 	GetCountClassroomsByUser(userId string) (int64, error)
 	GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error)
+	GetUserJoinedWithClassrooms(classId string, limit int, offset int) ([]*model.User, error)
+	GetUserWaitingWithClassrooms(classId string, limit int, offset int) ([]*model.User, error)
+	GetCountUsersByClassroom(classId string) (int64, int64, error)
+	GetInfo(classId string, userId string) (*model.StudentClass, error)
 }
 
 type studentClassRepository struct {
@@ -45,8 +49,8 @@ func (r *studentClassRepository) Update(sc *model.StudentClass) error {
 	return r.dao.Update(sc)
 }
 
-func (r *studentClassRepository) Delete(userID, classID string) error {
-	return r.dao.Delete(userID, classID)
+func (r *studentClassRepository) Delete(sc *model.StudentClass) error {
+	return r.dao.Delete(sc)
 }
 
 func (r *studentClassRepository) GetClassroomsByUser(userId string, limit int, offset int) ([]*model.Classroom, error) {
@@ -57,4 +61,16 @@ func (r *studentClassRepository) GetCountClassroomsByUser(userId string) (int64,
 }
 func (r *studentClassRepository) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
 	return r.dao.GetClassroomsWithNewScheduler(userId)
+}
+func (r *studentClassRepository) GetUserJoinedWithClassrooms(classId string, limit int, offset int) ([]*model.User, error) {
+	return r.dao.GetUserJoinedWithClassrooms(classId, limit, offset)
+}
+func (r *studentClassRepository) GetUserWaitingWithClassrooms(classId string, limit int, offset int) ([]*model.User, error) {
+	return r.dao.GetUserWaitingWithClassrooms(classId, limit, offset)
+}
+func (r *studentClassRepository) GetCountUsersByClassroom(classId string) (int64, int64, error) {
+	return r.dao.GetCountUsersByClassroom(classId)
+}
+func (r *studentClassRepository) GetInfo(classId string, userId string) (*model.StudentClass, error) {
+	return r.dao.GetInfo(classId, userId)
 }

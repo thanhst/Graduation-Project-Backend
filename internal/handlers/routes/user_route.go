@@ -17,4 +17,6 @@ func SetupUserRoutes(r *mux.Router) {
 	user.HandleFunc("/{id}/get", userController.GetUser).Methods("GET")
 	user.HandleFunc("/{id}/update", userController.UpdateUser).Methods("POST")
 	user.HandleFunc("/{id}/delete", userController.DeleteUser).Methods("DELETE")
+	user.HandleFunc("/{id}/update/infor", userController.UpdateInformationOfUser).Methods("POST")
+
 }

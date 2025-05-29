@@ -25,6 +25,9 @@ func (s *ClassService) GetCountClassroomsByUser(userId string) (int64, error) {
 func (s *ClassService) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
 	return s.classRepo.GetClassroomsWithNewScheduler(userId)
 }
+func (s *ClassService) GetTeacherFromClass(classId string) (*model.User,error){
+	return s.classRepo.GetTeacherFromClass(classId)
+}
 func (s *ClassService) Create(classroom *model.Classroom) error {
 	return s.classRepo.Create(classroom)
 }

@@ -2,6 +2,7 @@ package schedulerdao
 
 import (
 	model "server/internal/models"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -24,8 +25,8 @@ func (dao *schedulerDAOImpl) GetByID(id string) (*model.Scheduler, error) {
 	return &s, err
 }
 
-func (dao *schedulerDAOImpl) GetByUserID(userID string, limit int, offset int) ([]model.Scheduler, error) {
-	var schedulers []model.Scheduler
+func (dao *schedulerDAOImpl) GetByUserID(userID string, limit int, offset int) ([]*model.Scheduler, error) {
+	var schedulers []*model.Scheduler
 	err := dao.db.
 		Preload("Room").
 		Preload("Classroom").
@@ -37,8 +38,8 @@ func (dao *schedulerDAOImpl) GetByUserID(userID string, limit int, offset int) (
 	return schedulers, err
 }
 
-func (dao *schedulerDAOImpl) GetByClassID(classID string) ([]model.Scheduler, error) {
-	var schedulers []model.Scheduler
+func (dao *schedulerDAOImpl) GetByClassID(classID string) ([]*model.Scheduler, error) {
+	var schedulers []*model.Scheduler
 	err := dao.db.
 		Where("class_id = ?", classID).
 		Find(&schedulers).Error
@@ -55,4 +56,12 @@ func (dao *schedulerDAOImpl) Update(s *model.Scheduler) error {
 
 func (dao *schedulerDAOImpl) Delete(id string) error {
 	return dao.db.Delete(&model.Scheduler{}, "scheduler_id = ?", id).Error
+}
+
+func (dao *schedulerDAOImpl) GetSchedulerByUserAndDate(userId string, date time.Time) ([]*model.Scheduler, error) {
+	var schedulers []*model.Scheduler
+	err := dao.db.
+		Where("user_id = ? and start_time =? ", userId, date).
+		Find(&schedulers).Error
+	return schedulers, err
 }

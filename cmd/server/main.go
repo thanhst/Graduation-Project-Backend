@@ -26,5 +26,6 @@ func main() {
 
 	// Bắt đầu server trên port 8080
 	fmt.Printf("Starting server on %s\n", port)
+	log.Printf("Server start!")
 	log.Fatal(http.ListenAndServe(":"+port, httpHandler))
 }

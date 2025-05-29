@@ -125,3 +125,13 @@ func (cls *ClassroomController) GetClassroomsWithNewScheduler(w http.ResponseWri
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(classrooms)
 }
+func (cls *ClassroomController) GetTeacherFromClass(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	classId := vars["id"]
+	teacher, err := cls.classService.GetTeacherFromClass(classId)
+	if err != nil {
+		http.Error(w, "Error to get teacher!", http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(teacher)
+}

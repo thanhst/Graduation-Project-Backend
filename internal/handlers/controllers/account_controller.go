@@ -118,6 +118,7 @@ func (ac *AccountController) Login(w http.ResponseWriter, r *http.Request) {
 		"user_id":         tokens["user_id"],
 		"role":            tokens["role"],
 		"last_login":      tokens["last_login"],
+		"login_method":    tokens["login_method"],
 		"access_exprise":  tokens["access_exprise"],
 		"refresh_exprise": tokens["refresh_exprise"],
 	}
@@ -279,6 +280,7 @@ func (ac *AccountController) LoginWithGoogle(w http.ResponseWriter, r *http.Requ
 			"user_id":         tokens["user_id"],
 			"role":            tokens["role"],
 			"last_login":      tokens["last_login"],
+			"login_method":    tokens["login_method"],
 			"access_exprise":  tokens["access_exprise"],
 			"refresh_exprise": tokens["refresh_exprise"],
 		}
@@ -387,14 +389,15 @@ func (a *AccountController) GitHubCallback(w http.ResponseWriter, r *http.Reques
 			last_login = LastLogin.String()
 		}
 
-		helper.SetTokenCookies(w, accessToken, refreshToken, time.Now().Add(jwtutil.GetAccessExpire()).String(), time.Now().Add(jwtutil.GetRefreshExpire()).String())
+		helper.SetTokenCookies(w, accessToken, refreshToken, time.Now().Add(jwtutil.GetAccessExpire()).UTC().Format(time.RFC3339), time.Now().Add(jwtutil.GetRefreshExpire()).UTC().Format(time.RFC3339))
 		w.Header().Set("Content-Type", "application/json")
 		response := map[string]interface{}{
 			"user_id":         account.UserId,
 			"role":            account.Role,
 			"last_login":      last_login,
-			"access_exprise":  time.Now().Add(jwtutil.GetAccessExpire()).String(),
-			"refresh_exprise": time.Now().Add(jwtutil.GetRefreshExpire()).String(),
+			"login_method":    account.LoginMethod,
+			"access_exprise":  time.Now().Add(jwtutil.GetAccessExpire()).UTC().Format(time.RFC3339),
+			"refresh_exprise": time.Now().Add(jwtutil.GetRefreshExpire()).UTC().Format(time.RFC3339),
 		}
 		jsonBytes, err := json.Marshal(response)
 		if err != nil {

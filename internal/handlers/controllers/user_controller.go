@@ -11,6 +11,7 @@ import (
 	service "server/internal/handlers/services"
 	model "server/internal/models"
 	"server/internal/utils/dotenv"
+	CustomHash "server/internal/utils/hash"
 	"strconv"
 	"time"
 
@@ -121,7 +122,7 @@ func (userController *UserController) UpdateUser(w http.ResponseWriter, r *http.
 				}
 			}
 		} else {
-			log.Printf("Error for found accounts")
+			log.Printf("Not set role for user")
 		}
 		if teacherId != "" {
 		}
@@ -150,4 +151,92 @@ func (userController *UserController) DeleteUser(w http.ResponseWriter, r *http.
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+func (userController *UserController) UpdateInformationOfUser(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	err := r.ParseMultipartForm(50 << 20)
+	if err != nil {
+		http.Error(w, "Cannot parse form", http.StatusBadRequest)
+		return
+	}
+	fullname := r.FormValue("fullname")
+	oldPassword := r.FormValue("oldPassword")
+	newPassword := r.FormValue("newPassword")
+	loginMethod := r.FormValue("loginMethod")
+
+	if oldPassword != "" && newPassword != "" {
+		accounts, err := userController.accountService.GetAccountsByUser(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		} else {
+			if len(accounts) > 0 {
+				if loginMethod == "email" {
+					for i := 0; i < len(accounts); i++ {
+						if accounts[i].LoginMethod == "email" {
+							if CustomHash.CheckPassword(accounts[i].Password, oldPassword) {
+								newPass, err := CustomHash.HashPassword(newPassword)
+								if err != nil {
+									http.Error(w, err.Error(), http.StatusInternalServerError)
+									return
+								}
+								accounts[i].Password = newPass
+								userController.accountService.Update(accounts[i])
+							} else {
+								http.Error(w, "Your password is incorrect!", http.StatusInternalServerError)
+								return
+							}
+							break
+						}
+					}
+				}
+			} else {
+				http.Error(w, "Error for find accounts", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	existingUser, err := userController.userService.GetUserByID(id)
+	if err != nil {
+		http.Error(w, "Error for find your account!", http.StatusInternalServerError)
+		return
+	} else {
+		file, header, err := r.FormFile("imagePreview")
+
+		if err == nil {
+			files, err := filepath.Glob("./uploads/" + id + ".*")
+			if err == nil {
+				for _, f := range files {
+					os.Remove(f)
+				}
+			}
+			defer file.Close()
+			ext := filepath.Ext(header.Filename)
+			filePath := "/uploads/" + id + ext
+			dst, err := os.Create("." + filePath)
+			if err != nil {
+				http.Error(w, "Cannot save image"+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer dst.Close()
+
+			_, err = io.Copy(dst, file)
+			if err != nil {
+				http.Error(w, "Error to save image!", http.StatusInternalServerError)
+				return
+			}
+			existingUser.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + filePath
+		}
+		existingUser.FullName = fullname
+	}
+
+	errOfupdate := userController.userService.UpdateUser(existingUser)
+	if errOfupdate != nil {
+		http.Error(w, "Error for update your account!", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{"user": existingUser})
 }

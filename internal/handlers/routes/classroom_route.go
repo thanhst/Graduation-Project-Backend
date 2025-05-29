@@ -54,4 +54,20 @@ func SetupClassroomApp(r *mux.Router) {
 			"teacher": classController.Delete,
 		},
 	)).Methods("DELETE")
+	classroom.HandleFunc("/{id}/teacher", classController.GetTeacherFromClass).Methods("Get")
+	classroom.HandleFunc("/{id}/accept", middleware.RoleSwitchMiddleware(
+		app.ServiceContainer.AccountService,
+		map[string]http.HandlerFunc{
+			"teacher": studentController.AcceptUser,
+		}))
+	classroom.HandleFunc("/{id}/reject", middleware.RoleSwitchMiddleware(
+		app.ServiceContainer.AccountService,
+		map[string]http.HandlerFunc{
+			"teacher": studentController.RejectUser,
+		}))
+	classroom.HandleFunc("/{id}/join", middleware.RoleSwitchMiddleware(
+		app.ServiceContainer.AccountService,
+		map[string]http.HandlerFunc{
+			"student": studentController.JoinClass,
+		}))
 }

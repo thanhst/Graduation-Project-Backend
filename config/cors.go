@@ -6,7 +6,7 @@ func SetupCors() *cors.Cors {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type", "Upgrade", "Connection"},
 		AllowCredentials: true,
 	})
 	return c

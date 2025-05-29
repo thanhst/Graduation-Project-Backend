@@ -106,8 +106,8 @@ func RefreshTokens(refreshToken string) (map[string]string, error) {
 	return map[string]string{
 		"access_token":    accessToken,
 		"refresh_token":   newRefreshToken,
-		"access_exprise":  time.Now().Add(GetAccessExpire()).String(),
-		"refresh_exprise": time.Now().Add(GetRefreshExpire()).String(),
+		"access_exprise":  time.Now().Add(GetAccessExpire()).UTC().Format(time.RFC3339),
+		"refresh_exprise": time.Now().Add(GetRefreshExpire()).UTC().Format(time.RFC3339),
 	}, nil
 }
 

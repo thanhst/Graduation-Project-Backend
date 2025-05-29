@@ -24,6 +24,24 @@ func (stcls *StudentClassService) GetClassroomsWithNewScheduler(userId string) (
 	return stcls.studentClassRepo.GetClassroomsWithNewScheduler(userId)
 }
 
-// func (stcls *StudentClassService) GetAllClassroomsByUser(userId string) (int64, error) {
-// 	return stcls.studentClassRepo.GetAllClassroomsByUser(userId)
-// }
+func (stcls *StudentClassService) JoinClass(stdClass *model.StudentClass) error {
+	return stcls.studentClassRepo.JoinClass(stdClass)
+}
+func (stcls *StudentClassService) GetUserJoinedWithClassrooms(classId string, limit int, offset int) ([]*model.User, error) {
+	return stcls.studentClassRepo.GetUserJoinedWithClassrooms(classId, limit, offset)
+}
+func (stcls *StudentClassService) GetUserWaitingWithClassrooms(classId string, limit int, offset int) ([]*model.User, error) {
+	return stcls.studentClassRepo.GetUserWaitingWithClassrooms(classId, limit, offset)
+}
+func (stcls *StudentClassService) GetCountUsersByClassroom(classId string) (int64, int64, error) {
+	return stcls.studentClassRepo.GetCountUsersByClassroom(classId)
+}
+func (stcls *StudentClassService) Update(std *model.StudentClass) error {
+	return stcls.studentClassRepo.Update(std)
+}
+func (stcls *StudentClassService) Delete(std *model.StudentClass) error {
+	return stcls.studentClassRepo.Delete(std)
+}
+func (stcls *StudentClassService) GetInfo(classId string, userId string) (*model.StudentClass, error) {
+	return stcls.studentClassRepo.GetInfo(classId, userId)
+}
