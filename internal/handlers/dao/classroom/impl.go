@@ -31,7 +31,7 @@ func (dao *classroomDAOImpl) GetByTeacherID(teacherID string, limit int, offset 
 	err := dao.db.
 		Where("user_created = ?", teacherID).
 		Preload("User").
-		Preload("StudentClasses").Preload("StudentClasses.User").
+		Preload("StudentClasses", "state=?", "joined").Preload("StudentClasses.User").
 		Limit(limit).
 		Offset(offset).
 		Find(&classrooms).Error
@@ -82,11 +82,11 @@ func (dao *classroomDAOImpl) GetClassroomsWithNewScheduler(userId string) ([]*mo
 	return classrooms, nil
 }
 
-func (dao *classroomDAOImpl) GetTeacherFromClass(classId string) (*model.User, error) {
+func (dao *classroomDAOImpl) GetClassroomById(classId string) (*model.Classroom, error) {
 	var classroom model.Classroom
 	err := dao.db.Where("class_id = ?", classId).Preload("User").Find(&classroom).Error
 	if err != nil {
 		return nil, err
 	}
-	return &classroom.User, nil
+	return &classroom, nil
 }

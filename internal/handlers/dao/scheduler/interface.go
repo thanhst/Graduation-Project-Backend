@@ -12,5 +12,8 @@ type SchedulerDAO interface {
 	Create(s *model.Scheduler) error
 	Update(s *model.Scheduler) error
 	Delete(id string) error
-	GetSchedulerByUserAndDate(userId string, date time.Time) ([]*model.Scheduler, error)
+	GetSchedulerByUserAndDate(userId string, date string) ([]*model.Scheduler, error)
+	GetSchedulerByUser(userId string) ([]*model.Scheduler, error)
+	View(sId string) (*model.Scheduler, error)
+	GetCountSchedulerWithTime(classId string, date time.Time) (int64, error)
 }

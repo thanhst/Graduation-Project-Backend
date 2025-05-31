@@ -11,6 +11,7 @@ type NotificationRepository interface {
 	Create(noti *model.Notification) error
 	Delete(id string) error
 	DeleteAllOfUser(userID string) error
+	GetByClasssrom(classId string) ([]*model.Notification, error)
 }
 type notificationRepository struct {
 	dao notificationdao.NotificationDAO
@@ -38,4 +39,7 @@ func (r *notificationRepository) Delete(id string) error {
 
 func (r *notificationRepository) DeleteAllOfUser(userID string) error {
 	return r.dao.DeleteAllOfUser(userID)
+}
+func (r *notificationRepository) GetByClasssrom(userId string) ([]*model.Notification, error) {
+	return r.dao.GetByClasssrom(userId)
 }

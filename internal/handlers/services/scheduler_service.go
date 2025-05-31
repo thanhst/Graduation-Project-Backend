@@ -24,7 +24,15 @@ func (scheduler *SchedulerService) Delete(scheduleId string) error {
 	return scheduler.SchedulerRepo.Delete(scheduleId)
 }
 
-func (scheduler *SchedulerService) GetSchedulerByUserAndDate(userId string, date time.Time) ([]*model.Scheduler, error) {
+func (scheduler *SchedulerService) GetSchedulerByUserAndDate(userId string, date string) ([]*model.Scheduler, error) {
 	return scheduler.SchedulerRepo.GetSchedulerByUserAndDate(userId, date)
 }
-
+func (sch *SchedulerService) GetSchedulerByUser(userId string) ([]*model.Scheduler, error) {
+	return sch.SchedulerRepo.GetSchedulerByUser(userId)
+}
+func (sch *SchedulerService) View(schId string) (*model.Scheduler, error) {
+	return sch.SchedulerRepo.View(schId)
+}
+func (s *SchedulerService) GetCountSchedulerWithTime(classId string, date time.Time) (int64, error) {
+	return s.SchedulerRepo.GetCountSchedulerWithTime(classId, date)
+}

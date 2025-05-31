@@ -46,3 +46,13 @@ func (dao *notificationDAOImpl) Delete(id string) error {
 func (dao *notificationDAOImpl) DeleteAllOfUser(userId string) error {
 	return dao.db.Where("user_id = ?", userId).Delete(&model.Notification{}).Error
 }
+
+func (dao *notificationDAOImpl) GetByClasssrom(classId string) ([]*model.Notification, error) {
+	var data []*model.Notification
+	if err := dao.db.Where("class_id = ?", classId).
+		Order("created_at DESC").
+		Find(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
+}

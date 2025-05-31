@@ -58,10 +58,50 @@ func (dao *schedulerDAOImpl) Delete(id string) error {
 	return dao.db.Delete(&model.Scheduler{}, "scheduler_id = ?", id).Error
 }
 
-func (dao *schedulerDAOImpl) GetSchedulerByUserAndDate(userId string, date time.Time) ([]*model.Scheduler, error) {
+func (dao *schedulerDAOImpl) GetSchedulerByUserAndDate(userId string, date string) ([]*model.Scheduler, error) {
 	var schedulers []*model.Scheduler
 	err := dao.db.
-		Where("user_id = ? and start_time =? ", userId, date).
+		Table("schedulers AS s").
+		Joins("LEFT JOIN classrooms c ON s.class_id = c.class_id").
+		Joins("LEFT JOIN student_classes sc ON sc.class_id = c.class_id").
+		Preload("User").
+		Preload("Classroom").
+		Preload("Room").
+		Where("DATE(s.start_time) = ?", date).
+		Where("s.user_id = ? OR sc.user_id = ?", userId, userId).
+		Select("DISTINCT s.*").
 		Find(&schedulers).Error
 	return schedulers, err
+}
+func (dao *schedulerDAOImpl) GetSchedulerByUser(userId string) ([]*model.Scheduler, error) {
+	var schedulers []*model.Scheduler
+	err := dao.db.
+		Table("schedulers AS s").
+		Joins("LEFT JOIN classrooms c ON s.class_id = c.class_id").
+		Joins("LEFT JOIN student_classes sc ON sc.class_id = c.class_id").
+		Preload("User").
+		Preload("Classroom").
+		Preload("Room").
+		Where("s.user_id = ? OR sc.user_id = ?", userId, userId).
+		Select("DISTINCT s.*").
+		Find(&schedulers).Error
+	return schedulers, err
+}
+func (dao *schedulerDAOImpl) View(sId string) (*model.Scheduler, error) {
+	var scheduler *model.Scheduler
+	err := dao.db.
+		Preload("User").
+		Preload("Classroom").
+		Preload("Room").
+		Where("scheduler_id = ?", sId).
+		Find(&scheduler).Error
+	return scheduler, err
+}
+func (dao *schedulerDAOImpl) GetCountSchedulerWithTime(classId string, date time.Time) (int64, error) {
+	var count int64
+	err := dao.db.
+		Model(&model.Scheduler{}).
+		Where("class_id = ? and start_time= ?", classId, date).
+		Count(&count).Error
+	return count, err
 }

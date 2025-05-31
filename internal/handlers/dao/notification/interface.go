@@ -8,4 +8,5 @@ type NotificationDAO interface {
 	Create(notification *model.Notification) error
 	Delete(id string) error
 	DeleteAllOfUser(userId string) error
+	GetByClasssrom(classId string) ([]*model.Notification, error)
 }

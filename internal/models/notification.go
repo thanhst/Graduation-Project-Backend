@@ -12,6 +12,6 @@ type Notification struct {
 	Type           string    `gorm:"type:enum('success','warning','info')" json:"type"`
 	CreatedAt      time.Time `gorm:"autoCreateTime" json:"createdAt"`
 
-	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	User      User      `gorm:"foreignKey:UserId;references:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;"`
+	User      User      `gorm:"foreignKey:UserId;references:UserId;"`
 }

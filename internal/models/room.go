@@ -6,12 +6,12 @@ import (
 
 type Room struct {
 	RoomId    string     `gorm:"type:varchar(255);primaryKey;not null" json:"roomID"`
-	ClassId   *string    `gorm:"type:varchar(255);index" json:"classID,omitempty"`
-	State     string     `gorm:"type:enum('opening','closed')" json:"state"`
+	ClassId   *string    `gorm:"type:varchar(255);" json:"classID,omitempty"`
+	State     string     `gorm:"type:enum('opening','closed');default:closed" json:"state"`
 	Host      string     `gorm:"not null" json:"host"`
 	CreatedAt time.Time  `gorm:"autoCreateTime" json:"createdAt"`
 	EndedAt   *time.Time `json:"endAt,omitempty"`
 
-	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	User      User      `gorm:"foreignKey:Host;references:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;"`
+	User      User      `gorm:"foreignKey:Host;references:UserId;"`
 }

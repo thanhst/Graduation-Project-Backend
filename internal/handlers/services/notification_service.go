@@ -22,3 +22,6 @@ func (NotificationService *NotificationService) Create(notification *model.Notif
 func (NotificationService *NotificationService) Delete(notificationId string) error {
 	return NotificationService.NotificationRepo.Delete(notificationId)
 }
+func (NotificationService *NotificationService) GetByClasssrom(classId string) ([]*model.Notification, error) {
+	return NotificationService.NotificationRepo.GetByClasssrom(classId)
+}

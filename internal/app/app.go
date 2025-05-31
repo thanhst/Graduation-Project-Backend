@@ -30,11 +30,16 @@ func SetupAuthApp() *controller.AccountController {
 
 func SetupClassroomApp() *controller.ClassroomController {
 	classroomController := controller.
-		NewClassroomController(&ServiceContainer.ClassroomService)
+		NewClassroomController(ServiceContainer.ClassroomService)
 	return classroomController
 }
 func SetupStudentClassApp() *controller.StudentClassController {
 	studentClassController := controller.
-		NewStudentClassController(&ServiceContainer.StudentClassService)
+		NewStudentClassController(ServiceContainer.StudentClassService)
 	return studentClassController
+}
+func SetupSchedulerApp() *controller.SchedulerController {
+	schedulerController := controller.NewSchedulerController(ServiceContainer.SchedulerService, ServiceContainer.ClassroomService,
+		ServiceContainer.RoomService, ServiceContainer.NotificationService)
+	return schedulerController
 }

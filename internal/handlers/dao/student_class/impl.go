@@ -129,7 +129,10 @@ func (dao *studentClassDAOImpl) GetClassroomsByUser(userId string, limit int, of
 	err := dao.db.
 		Where("user_id = ? and state = ?", userId, "joined").
 		Preload("User").
-		Preload("Classroom").Preload("Classroom.StudentClasses.User").
+		Preload("Classroom").
+		Preload("Classroom.User").
+		Preload("Classroom.StudentClasses", "state = ?", "joined").
+		Preload("Classroom.StudentClasses.User").
 		Limit(limit).Offset(offset).
 		Order("created_at DESC").
 		Find(&studentClasses).Error

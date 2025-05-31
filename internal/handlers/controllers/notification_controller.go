@@ -1,24 +1,64 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	service "server/internal/handlers/services"
+	model "server/internal/models"
+
+	"github.com/gorilla/mux"
 )
 
 type NotificationController struct {
-	NotificationService *service.NotificationService
+	notificationService *service.NotificationService
 	classService        *service.ClassService
 }
 
 func NewNotificationController(s *service.NotificationService, cls *service.ClassService) *NotificationController {
-	return &NotificationController{NotificationService: s, classService: cls}
+	return &NotificationController{notificationService: s, classService: cls}
 }
 func (notificationController *NotificationController) Create(w http.ResponseWriter, r *http.Request) {
-
+	var notification model.Notification
+	if err := json.NewDecoder(r.Body).Decode(&notification); err != nil {
+		http.Error(w, "Fail to get notification in body", http.StatusBadRequest)
+		return
+	}
+	if err := notificationController.notificationService.Create(&notification); err != nil {
+		http.Error(w, "Error to save notification", http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(&notification)
 }
 func (notificationController *NotificationController) Update(w http.ResponseWriter, r *http.Request) {
 
 }
 func (notificationController *NotificationController) Delete(w http.ResponseWriter, r *http.Request) {
-
+	Vars := mux.Vars(r)
+	notifId := Vars["id"]
+	if notifId == "" {
+		http.Error(w, "Error to delete schedule", http.StatusBadRequest)
+		return
+	}
+	if err := notificationController.notificationService.Delete(notifId); err != nil {
+		http.Error(w, "Error to save notification", http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Delete success!",
+	})
+}
+func (notificationController *NotificationController) GetByClasssrom(w http.ResponseWriter, r *http.Request) {
+	Vars := mux.Vars(r)
+	classId := Vars["id"]
+	notifications, err := notificationController.notificationService.GetByClasssrom(classId)
+	if err != nil {
+		http.Error(w, "Error to get notification", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&notifications)
 }

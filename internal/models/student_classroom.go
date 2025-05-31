@@ -11,6 +11,6 @@ type StudentClass struct {
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	JoinedAt  time.Time `gorm:"autoUpdateTime" json:"joinedAt"`
 
-	User      User      `gorm:"foreignKey:UserId;references:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"User"`
-	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"Classroom"`
+	User      User      `gorm:"foreignKey:UserId;references:UserId;" json:"User"`
+	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;" json:"Classroom"`
 }

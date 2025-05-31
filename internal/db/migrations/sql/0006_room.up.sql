@@ -1,7 +1,7 @@
 CREATE TABLE rooms (
     room_id VARCHAR(255) NOT NULL PRIMARY KEY,
     class_id VARCHAR(255),
-    state ENUM('opening','closed'),
+    state ENUM('opening','closed') DEFAULT 'closed',
     host VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ended_at TIMESTAMP NULL,

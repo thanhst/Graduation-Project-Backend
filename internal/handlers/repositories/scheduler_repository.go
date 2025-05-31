@@ -13,7 +13,10 @@ type SchedulerRepository interface {
 	Create(s *model.Scheduler) error
 	Update(s *model.Scheduler) error
 	Delete(schedulerId string) error
-	GetSchedulerByUserAndDate(userId string, date time.Time) ([]*model.Scheduler, error)
+	GetSchedulerByUserAndDate(userId string, date string) ([]*model.Scheduler, error)
+	GetSchedulerByUser(userId string) ([]*model.Scheduler, error)
+	View(sId string) (*model.Scheduler, error)
+	GetCountSchedulerWithTime(classId string, date time.Time) (int64, error)
 }
 type schedulerRepository struct {
 	schedulerDAO schedulerdao.SchedulerDAO
@@ -47,6 +50,16 @@ func (r *schedulerRepository) Delete(schedulerId string) error {
 	return r.schedulerDAO.Delete(schedulerId)
 }
 
-func (r *schedulerRepository) GetSchedulerByUserAndDate(userId string, date time.Time) ([]*model.Scheduler, error) {
+func (r *schedulerRepository) GetSchedulerByUserAndDate(userId string, date string) ([]*model.Scheduler, error) {
 	return r.schedulerDAO.GetSchedulerByUserAndDate(userId, date)
+}
+
+func (r *schedulerRepository) GetSchedulerByUser(userId string) ([]*model.Scheduler, error) {
+	return r.schedulerDAO.GetSchedulerByUser(userId)
+}
+func (r *schedulerRepository) View(sId string) (*model.Scheduler, error) {
+	return r.schedulerDAO.View(sId)
+}
+func (r *schedulerRepository) GetCountSchedulerWithTime(classId string, date time.Time) (int64, error) {
+	return r.schedulerDAO.GetCountSchedulerWithTime(classId, date)
 }

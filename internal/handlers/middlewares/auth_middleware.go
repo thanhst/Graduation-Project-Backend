@@ -25,7 +25,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Invalid token: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
-
 		ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

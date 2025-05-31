@@ -3,6 +3,8 @@ CREATE TABLE schedulers (
     room_id VARCHAR(255) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     class_id VARCHAR(255),
+    title VARCHAR(255),
+    description TEXT,
     start_time DATETIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

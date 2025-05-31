@@ -132,7 +132,7 @@ func (st *StudentClassController) GetUserWaitingWithClassrooms(w http.ResponseWr
 		http.Error(w, "Error to convert offset int", http.StatusBadRequest)
 		return
 	}
-	classrooms, err := st.stclsService.GetUserJoinedWithClassrooms(classId, limitInt, offsetInt)
+	classrooms, err := st.stclsService.GetUserWaitingWithClassrooms(classId, limitInt, offsetInt)
 	if err != nil {
 		http.Error(w, "Error to get classrooms", http.StatusBadRequest)
 		return
@@ -170,8 +170,8 @@ func (st *StudentClassController) GetCountUsersByClassroom(w http.ResponseWriter
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"Count joined":  strconv.Itoa(int(countJoined)),
-		"Count waiting": strconv.Itoa(int(countWaiting)),
+		"countJoined":  strconv.Itoa(int(countJoined)),
+		"countWaiting": strconv.Itoa(int(countWaiting)),
 	})
 }
 
@@ -208,8 +208,12 @@ func (st *StudentClassController) JoinClass(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Error to accept this class", http.StatusInternalServerError)
 		return
 	}
+	if std.State == "joined" {
+		http.Error(w, "You had joined this class", http.StatusInternalServerError)
+		return
+	}
 	if std.UserId != "" {
-		http.Error(w, "You have requested this class, please wait for teacher's response.", http.StatusInternalServerError)
+		http.Error(w, "You had requested this class, please wait for teacher's response.", http.StatusInternalServerError)
 		return
 	}
 	if err := st.stclsService.JoinClass(&stdjoinclass); err != nil {
@@ -218,17 +222,18 @@ func (st *StudentClassController) JoinClass(w http.ResponseWriter, r *http.Reque
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"messsage": "Your request has been sent to this classroom's teacher.",
+		"message": "Your request has been sent to this classroom's teacher.",
 	})
 }
 func (st *StudentClassController) AcceptUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	classId := vars["id"]
-	var userId string
-	if err := json.NewDecoder(r.Body).Decode(&userId); err != nil {
+	var jsonUser dto.UserReponse
+	if err := json.NewDecoder(r.Body).Decode(&jsonUser); err != nil {
 		http.Error(w, "Error to join this class", http.StatusInternalServerError)
 		return
 	}
+	userId := jsonUser.UserID
 	std, err := st.stclsService.GetInfo(classId, userId)
 	if err != nil {
 		http.Error(w, "Error to accept this class", http.StatusInternalServerError)
@@ -248,11 +253,12 @@ func (st *StudentClassController) AcceptUser(w http.ResponseWriter, r *http.Requ
 func (st *StudentClassController) RejectUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	classId := vars["id"]
-	var userId string
-	if err := json.NewDecoder(r.Body).Decode(&userId); err != nil {
+	var jsonUser dto.UserReponse
+	if err := json.NewDecoder(r.Body).Decode(&jsonUser); err != nil {
 		http.Error(w, "Error to join this class", http.StatusInternalServerError)
 		return
 	}
+	userId := jsonUser.UserID
 	std, err := st.stclsService.GetInfo(classId, userId)
 	if err != nil {
 		http.Error(w, "Error to accept this class", http.StatusInternalServerError)
@@ -264,6 +270,6 @@ func (st *StudentClassController) RejectUser(w http.ResponseWriter, r *http.Requ
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"messsage": "Reject student success!",
+		"message": "Reject student success!",
 	})
 }

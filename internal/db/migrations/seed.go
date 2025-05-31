@@ -187,6 +187,8 @@ func SeedScheduler(db *gorm.DB, randomRoom model.Room, classId *string) error {
 		RoomId:      randomRoom.RoomId,
 		UserId:      randomRoom.Host,
 		ClassId:     classId,
+		Title:       "",
+		Description: "",
 		StartTime:   time.Now().Add(+48 * time.Hour),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),

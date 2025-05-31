@@ -98,7 +98,21 @@ func (cls *ClassroomController) GetClassroomsByUser(w http.ResponseWriter, r *ht
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(classrooms)
 }
-func (cls *ClassroomController) GetClassroomById(w http.ResponseWriter, r *http.Request) {}
+func (cls *ClassroomController) GetClassroomById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	classId := vars["id"]
+	if classId == "" {
+		http.Error(w, "Error to get classrooms", http.StatusBadRequest)
+		return
+	}
+	classroom, err := cls.classService.GetClassroomById(classId)
+	if err != nil {
+		http.Error(w, "Error to get classrooms", http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(classroom)
+}
 func (cls *ClassroomController) GetCountClassroomsByUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["id"]
@@ -124,14 +138,4 @@ func (cls *ClassroomController) GetClassroomsWithNewScheduler(w http.ResponseWri
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(classrooms)
-}
-func (cls *ClassroomController) GetTeacherFromClass(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	classId := vars["id"]
-	teacher, err := cls.classService.GetTeacherFromClass(classId)
-	if err != nil {
-		http.Error(w, "Error to get teacher!", http.StatusInternalServerError)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(teacher)
 }

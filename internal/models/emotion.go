@@ -11,6 +11,6 @@ type Emotion struct {
 	Emotion   string    `gorm:"type:enum('Happy','Sad','Neutral','Fear','Surprise')" json:"emotion"`
 	CreatedAt time.Time `gorm:"autoCreateTime;index" json:"createdAt"`
 
-	Room Room `gorm:"foreignKey:RoomId;references:RoomId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	User User `gorm:"foreignKey:UserId;references:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Room Room `gorm:"foreignKey:RoomId;references:RoomId;"`
+	User User `gorm:"foreignKey:UserId;references:UserId;"`
 }

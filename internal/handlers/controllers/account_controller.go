@@ -133,7 +133,12 @@ func (ac *AccountController) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 	userIdRaw, ok := data["userId"]
 	if !ok {
-		userID := r.Context().Value(middleware.UserIDKey).(string)
+		val := r.Context().Value(middleware.UserIDKey)
+		userID, ok := val.(string)
+		if !ok || userID == "" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 		err := ac.accountService.Logout(&userID)
 		if err != nil {
 			w.WriteHeader(http.StatusCreated)
@@ -164,9 +169,24 @@ func (ac *AccountController) Logout(w http.ResponseWriter, r *http.Request) {
 			"message": "Logout successfully!",
 		})
 	} else {
-		w.WriteHeader(http.StatusBadRequest)
+		val := r.Context().Value(middleware.UserIDKey)
+		userID, ok := val.(string)
+		if !ok || userID == "" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		err := ac.accountService.Logout(&userID)
+		if err != nil {
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": "Opps! Server have error!",
+			})
+		}
+		helper.RemoveCookies(w)
+		log.Printf("%v logout!\n", userID)
+		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(map[string]string{
-			"message": "Cannot found the user id!",
+			"message": "Logout successfully!",
 		})
 	}
 }
