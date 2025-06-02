@@ -244,7 +244,7 @@ func SeedNotification(db *gorm.DB) error {
 		notification := model.Notification{
 			NotificationId: CustomHash.HashMD5(time.Now().String()),
 			UserId:         users[rand.Intn(len(users))].UserId,
-			ClassId:        classes[rand.Intn(len(classes))].ClassId,
+			ClassId:        &classes[rand.Intn(len(classes))].ClassId,
 			Description:    helper.RandomDescription(),
 			Type:           "info",
 			CreatedAt:      time.Now(),

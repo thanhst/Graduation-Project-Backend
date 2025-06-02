@@ -17,6 +17,7 @@ func SetupRouter() http.Handler {
 	SetupAuthApp(api)
 	SetupClassroomApp(api)
 	SetupSchedulerRoutes(api)
+	SetupRoomApp(api)
 	SetupStaticRoutes(r)
 	websocket.SetupWebsocket(r)
 

@@ -154,24 +154,31 @@ func (dao *studentClassDAOImpl) GetCountClassroomsByUser(userId string) (int64, 
 	return count, nil
 }
 func (dao *studentClassDAOImpl) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
+	var classIDs []string
+
+	subQuery := dao.db.Model(&model.Scheduler{}).
+		Select("class_id, MIN(start_time) as nearest_start").
+		Where("start_time >= CURDATE() AND start_time < CURDATE() + INTERVAL 1 DAY").
+		Group("class_id")
+
+	err := dao.db.Table("classrooms c").
+		Joins("JOIN student_classes sc ON sc.class_id = c.class_id").
+		Joins("JOIN (?) smin ON smin.class_id = c.class_id", subQuery).
+		Joins("JOIN schedulers s ON s.class_id = smin.class_id AND s.start_time = smin.nearest_start").
+		Where("sc.user_id = ?", userId).
+		Pluck("DISTINCT c.class_id", &classIDs).Error
+	if err != nil {
+		return nil, err
+	}
 	var classrooms []*model.Classroom
 
-	query := `
-	SELECT DISTINCT c.*
-	FROM classrooms c
-	JOIN student_classes sc ON sc.class_id = c.class_id
-	JOIN (
-		SELECT class_id, MIN(start_time) AS nearest_start
-		FROM schedulers
-		WHERE DATE(start_time) = CURDATE()  -- chỉ lấy buổi học trong hôm nay
-		GROUP BY class_id
-	) smin ON smin.class_id = c.class_id
-	JOIN schedulers s ON s.class_id = smin.class_id AND s.start_time = smin.nearest_start
-	WHERE sc.user_id = ?
-	ORDER BY s.start_time ASC;
-    `
-
-	if err := dao.db.Raw(query, userId).Scan(&classrooms).Error; err != nil {
+	err = dao.db.Where("class_id IN ?", classIDs).
+		Preload("Schedulers").
+		Preload("StudentClasses.User").
+		Preload("User").
+		Order("class_id ASC").
+		Find(&classrooms).Error
+	if err != nil {
 		return nil, err
 	}
 	return classrooms, nil

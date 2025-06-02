@@ -43,3 +43,7 @@ func SetupSchedulerApp() *controller.SchedulerController {
 		ServiceContainer.RoomService, ServiceContainer.NotificationService)
 	return schedulerController
 }
+func SetupRoomApp() *controller.RoomController {
+	roomController := controller.NewRoomController(ServiceContainer.RoomService)
+	return roomController
+}

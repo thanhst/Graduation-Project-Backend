@@ -20,7 +20,8 @@ func (dao *roomDAOImpl) GetByID(roomID string) (*model.Room, error) {
 	err := dao.db.
 		Preload("Classroom").
 		Preload("User").
-		First(&room, "room_id = ?", roomID).Error
+		Where("room_id = ?", roomID).
+		Find(&room).Error
 	return &room, err
 }
 

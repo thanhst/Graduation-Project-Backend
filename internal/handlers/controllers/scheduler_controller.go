@@ -59,6 +59,32 @@ func (schedulerController *SchedulerController) Create(w http.ResponseWriter, r 
 		http.Error(w, "Error to create room", http.StatusBadRequest)
 		return
 	}
+	var notification *model.Notification
+	if scheduler.ClassId != nil {
+		notification = &model.Notification{
+			NotificationId: CustomHash.HashMD5(time.Now().String()),
+			UserId:         scheduler.UserId,
+			ClassId:        scheduler.ClassId,
+			Description:    scheduler.Description,
+			Type:           "success",
+			CreatedAt:      time.Now(),
+		}
+	} else {
+		notification = &model.Notification{
+			NotificationId: CustomHash.HashMD5(time.Now().String()),
+			UserId:         scheduler.UserId,
+			Description:    scheduler.Description,
+			Type:           "success",
+			CreatedAt:      time.Now(),
+		}
+	}
+
+	if err := schedulerController.notificationService.Create(notification); err != nil {
+		log.Println(err)
+		http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
+		return
+	}
+
 	if err := schedulerController.schedulerService.Create(&scheduler); err != nil {
 		log.Println(err)
 		http.Error(w, "Error to save schedule", http.StatusBadRequest)
@@ -70,6 +96,19 @@ func (schedulerController *SchedulerController) Create(w http.ResponseWriter, r 
 }
 func (schedulerController *SchedulerController) Update(w http.ResponseWriter, r *http.Request) {
 	var scheduler model.Scheduler
+	notification := &model.Notification{
+		NotificationId: CustomHash.HashMD5(time.Now().String()),
+		UserId:         scheduler.UserId,
+		ClassId:        scheduler.ClassId,
+		Description:    scheduler.Description,
+		Type:           "info",
+		CreatedAt:      time.Now(),
+	}
+	if err := schedulerController.notificationService.Create(notification); err != nil {
+		log.Println(err)
+		http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
+		return
+	}
 	if err := json.NewDecoder(r.Body).Decode(&scheduler); err != nil {
 		http.Error(w, "Fail to get schedule in body", http.StatusBadRequest)
 		return
@@ -88,6 +127,25 @@ func (schedulerController *SchedulerController) Delete(w http.ResponseWriter, r 
 	if schedulerId == "" {
 		http.Error(w, "Error to delete schedule", http.StatusBadRequest)
 		return
+	}
+	if s, err := schedulerController.schedulerService.View(schedulerId); err != nil {
+		log.Println(err)
+		http.Error(w, "Not found the schedule in server", http.StatusBadRequest)
+		return
+	} else {
+		notification := &model.Notification{
+			NotificationId: CustomHash.HashMD5(time.Now().String()),
+			UserId:         s.UserId,
+			ClassId:        s.ClassId,
+			Description:    s.Description,
+			Type:           "info",
+			CreatedAt:      time.Now(),
+		}
+		if err := schedulerController.notificationService.Create(notification); err != nil {
+			log.Println(err)
+			http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
+			return
+		}
 	}
 	if err := schedulerController.schedulerService.Delete(schedulerId); err != nil {
 		http.Error(w, "Error to delete schedule", http.StatusBadRequest)

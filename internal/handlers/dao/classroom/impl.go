@@ -32,6 +32,8 @@ func (dao *classroomDAOImpl) GetByTeacherID(teacherID string, limit int, offset 
 		Where("user_created = ?", teacherID).
 		Preload("User").
 		Preload("StudentClasses", "state=?", "joined").Preload("StudentClasses.User").
+		Preload("Notifications").
+		Preload("Schedulers").
 		Limit(limit).
 		Offset(offset).
 		Find(&classrooms).Error
@@ -61,30 +63,33 @@ func (dao *classroomDAOImpl) GetCountClassroomsByUser(userId string) (int64, err
 func (dao *classroomDAOImpl) GetClassroomsWithNewScheduler(userId string) ([]*model.Classroom, error) {
 	var classrooms []*model.Classroom
 
-	query := `
-    SELECT DISTINCT c.*
-	FROM classrooms c
-	LEFT JOIN (
-		SELECT s1.class_id, MIN(s1.start_time) AS nearest_start
-		FROM schedulers s1
-		WHERE DATE(s1.start_time) = CURDATE()  -- chỉ lấy lịch học trong hôm nay
-		GROUP BY s1.class_id
-	) smin ON smin.class_id = c.class_id
-	WHERE c.user_created = ?
-	AND smin.nearest_start IS NOT NULL;
-    `
+	subQuery := dao.db.Model(&model.Scheduler{}).
+		Select("class_id, MIN(start_time) AS nearest_start").
+		Where("DATE(start_time) = CURDATE()").
+		Group("class_id")
 
-	err := dao.db.Raw(query, userId).Scan(&classrooms).Error
+	err := dao.db.Model(&model.Classroom{}).
+		Joins("LEFT JOIN (?) AS smin ON smin.class_id = classrooms.class_id", subQuery).
+		Where("classrooms.user_created = ? AND smin.nearest_start IS NOT NULL", userId).
+		Preload("Schedulers").
+		Preload("StudentClasses.User").
+		Preload("User").
+		Find(&classrooms).Error
+
 	if err != nil {
 		return nil, err
 	}
-
 	return classrooms, nil
 }
 
 func (dao *classroomDAOImpl) GetClassroomById(classId string) (*model.Classroom, error) {
 	var classroom model.Classroom
-	err := dao.db.Where("class_id = ?", classId).Preload("User").Find(&classroom).Error
+	err := dao.db.Where("class_id = ?", classId).
+		Preload("User").
+		Preload("Notifications").
+		Preload("Schedulers").
+		Preload("StudentClasses").
+		Find(&classroom).Error
 	if err != nil {
 		return nil, err
 	}

@@ -17,4 +17,5 @@ type Classroom struct {
 	User           User           `gorm:"foreignKey:UserCreated;references:UserId;"`
 	StudentClasses []StudentClass `gorm:"foreignKey:ClassId;references:ClassId;"`
 	Schedulers     []Scheduler    `gorm:"foreignKey:ClassId;references:ClassId"`
+	Notifications  []Notification `gorm:"foreignKey:ClassId;references:ClassId"`
 }

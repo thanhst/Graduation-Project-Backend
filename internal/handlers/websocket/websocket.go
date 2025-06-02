@@ -17,4 +17,5 @@ var Upgrader = websocket.Upgrader{
 func SetupWebsocket(r *mux.Router) {
 	r.HandleFunc("/ws/notifications", NotificationsWsHandler)
 	r.HandleFunc("/ws/scheduler", SchedulerWsHandler)
+	r.HandleFunc("/ws/room", RoomWsHandler)
 }

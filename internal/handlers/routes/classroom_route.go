@@ -29,7 +29,7 @@ func SetupClassroomApp(r *mux.Router) {
 			"teacher": classController.GetCountClassroomsByUser,
 		},
 	)).Methods("GET")
-	classroom.Handle("/user/{id}/newest", middleware.RoleSwitchMiddleware(
+	classroom.Handle("/user/{id}/today", middleware.RoleSwitchMiddleware(
 		app.ServiceContainer.AccountService,
 		map[string]http.HandlerFunc{
 			"student": studentController.GetClassroomsWithNewScheduler,
