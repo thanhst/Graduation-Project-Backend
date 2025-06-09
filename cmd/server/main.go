@@ -10,7 +10,6 @@ import (
 	"server/internal/utils/dotenv"
 )
 
-// main function to set up the HTTP server
 func main() {
 	err := database.ConnectDB()
 	if err != nil {
@@ -21,11 +20,13 @@ func main() {
 
 	port := dotenv.GetDotEnv("APP_PORT")
 
-	// Tạo một router mới bằng mux
 	httpHandler := router.SetupRouter()
 
-	// Bắt đầu server trên port 8080
 	fmt.Printf("Starting server on %s\n", port)
 	log.Printf("Server start!")
-	log.Fatal(http.ListenAndServe(":"+port, httpHandler))
+	// log.Fatal(http.ListenAndServe(":"+port, httpHandler))
+	err = http.ListenAndServeTLS(":"+port, "cert.pem", "key.pem", httpHandler)
+	if err != nil {
+		log.Fatalf("HTTPS server failed to start: %v", err)
+	}
 }
