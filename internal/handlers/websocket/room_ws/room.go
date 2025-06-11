@@ -67,10 +67,12 @@ func RoomWsHandler(w http.ResponseWriter, r *http.Request) {
 				user.Role = "host"
 			}
 			room = createNewRoomWithHost(initMsg.RoomID, roomInfo.Host)
-			go room.Run()
 		}
+		go room.Run()
 		rooms[room.ID] = room
 	}
+	go readPump(user, room)
+	go writePump(user)
 	roomsMu.Unlock()
 
 	handleUserJoin(user, userInfo, room)
@@ -95,18 +97,25 @@ func (r *Room) broadcast(msg *RoomMessage) {
 		if u == msg.Sender {
 			continue
 		}
-		u.Send <- RoomMessage{
-			Event:   msg.Event,
-			Payload: msg.Payload,
-		}
+		func(u *UserConn) {
+			defer func() {
+				if recover := recover(); recover != nil {
+					log.Println("Recover error!")
+				}
+			}()
+			u.SafeSend(RoomMessage{
+				Event:   msg.Event,
+				Payload: msg.Payload,
+			})
+		}(u)
 	}
 }
 func (r *Room) broadcastWaitingRoom(msg *RoomMessage) {
 	for _, u := range r.Waiting {
-		u.Send <- RoomMessage{
+		u.SafeSend(RoomMessage{
 			Event:   msg.Event,
 			Payload: msg.Payload,
-		}
+		})
 	}
 }
 

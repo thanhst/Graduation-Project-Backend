@@ -9,8 +9,6 @@ import (
 func handleUserJoin(user *UserConn, userInfo *model.User, room *Room) {
 	room.Mu.Lock()
 	defer room.Mu.Unlock()
-	go readPump(user, room)
-	go writePump(user)
 	if user.Role == "host" {
 		handleHostJoin(user, userInfo, room)
 		return
@@ -40,7 +38,7 @@ func handleHostJoin(user *UserConn, userInfo *model.User, room *Room) {
 	room.Users[user.UserID] = user
 	room.UsersModel[user.UserID] = userInfo
 	log.Println("Host joined:", user.UserID)
-	user.Send <- RoomMessage{
+	user.SafeSend(RoomMessage{
 		Event:  "host_check",
 		Sender: nil,
 		Payload: map[string]interface{}{
@@ -52,10 +50,10 @@ func handleHostJoin(user *UserConn, userInfo *model.User, room *Room) {
 			"auto_join":             room.AllowAutoJoin,
 			"share_state":           room.AllowAutoShare,
 		},
-	}
+	})
 	for uid, u := range room.Waiting {
 		if uid != user.UserID {
-			u.Send <- RoomMessage{
+			u.SafeSend(RoomMessage{
 				Event: "host_joined",
 				Payload: map[string]interface{}{
 					"roomId":  room.ID,
@@ -63,7 +61,7 @@ func handleHostJoin(user *UserConn, userInfo *model.User, room *Room) {
 					"message": "Host has joined. Please wait for approval.",
 					"user":    userInfo,
 				},
-			}
+			})
 		}
 	}
 	handleActionAdd(room, userInfo, user)
@@ -71,7 +69,7 @@ func handleHostJoin(user *UserConn, userInfo *model.User, room *Room) {
 }
 
 func notifyWaiting(user *UserConn, userInfo *model.User, room *Room) {
-	user.Send <- RoomMessage{
+	user.SafeSend(RoomMessage{
 		Event: "join_waiting_room",
 		Payload: map[string]interface{}{
 			"roomId":  room.ID,
@@ -80,14 +78,14 @@ func notifyWaiting(user *UserConn, userInfo *model.User, room *Room) {
 			"message": "Waiting for host to accept you join this room!",
 			"user":    userInfo,
 		},
-	}
+	})
 	handleActionWTAdd(room, userInfo)
 }
 
 func notifyAccepted(user *UserConn, userInfo *model.User, room *Room) {
 	room.Users[user.UserID] = user
 	room.UsersModel[user.UserID] = userInfo
-	user.Send <- RoomMessage{
+	user.SafeSend(RoomMessage{
 		Event: "accepted",
 		Payload: map[string]interface{}{
 			"roomId":        room.ID,
@@ -97,7 +95,7 @@ func notifyAccepted(user *UserConn, userInfo *model.User, room *Room) {
 			"share_state":   room.AllowAutoShare,
 			"host":          getUserById(room.HostID),
 		},
-	}
+	})
 	handleActionAdd(room, userInfo, user)
 }
 
@@ -128,7 +126,7 @@ func handleRoomMessages(user *UserConn, room *Room) {
 			if guest, ok := room.Waiting[acceptedID]; ok {
 				guest.Accepted = true
 				userInfo := getUserById(guest.UserID)
-				guest.Send <- RoomMessage{
+				guest.SafeSend(RoomMessage{
 					Event: "accepted",
 					Payload: map[string]interface{}{
 						"roomId":        room.ID,
@@ -138,7 +136,7 @@ func handleRoomMessages(user *UserConn, room *Room) {
 						"share_state":   room.AllowAutoShare,
 						"host":          getUserById(room.HostID),
 					},
-				}
+				})
 				handleActionAdd(room, userInfo, guest)
 				handleActionWTRemove(room, userInfo, guest)
 			}
@@ -162,7 +160,7 @@ func handleRoomMessages(user *UserConn, room *Room) {
 				for userID, waitingUser := range waitingUsers {
 					waitingUser.Accepted = true
 					userInfo := getUserById(userID)
-					waitingUser.Send <- RoomMessage{
+					waitingUser.SafeSend(RoomMessage{
 						Event: "accepted",
 						Payload: map[string]interface{}{
 							"roomId":        room.ID,
@@ -172,7 +170,7 @@ func handleRoomMessages(user *UserConn, room *Room) {
 							"share_state":   room.AllowAutoShare,
 							"host":          getUserById(room.HostID),
 						},
-					}
+					})
 					handleActionAdd(room, userInfo, waitingUser)
 					handleActionWTRemove(room, userInfo, waitingUser)
 				}
@@ -243,7 +241,7 @@ func handleRoomMessages(user *UserConn, room *Room) {
 						"host":    newHostInfo,
 					},
 				}
-				newHost.Send <- RoomMessage{
+				newHost.SafeSend(RoomMessage{
 					Event:  "host_check",
 					Sender: nil,
 					Payload: map[string]interface{}{
@@ -255,7 +253,7 @@ func handleRoomMessages(user *UserConn, room *Room) {
 						"auto_join":             room.AllowAutoJoin,
 						"share_state":           room.AllowAutoShare,
 					},
-				}
+				})
 			}
 			room.Mu.Unlock()
 		case "remove_user":
@@ -272,13 +270,13 @@ func handleRoomMessages(user *UserConn, room *Room) {
 			room.Mu.Lock()
 			if guest, ok := room.Waiting[acceptedID]; ok {
 				userInfo := getUserById(guest.UserID)
-				guest.Send <- RoomMessage{
+				guest.SafeSend(RoomMessage{
 					Event: "removed",
 					Payload: map[string]interface{}{
 						"role":   guest.Role,
 						"roomId": room.ID,
 					},
-				}
+				})
 				handleActionWTRemove(room, userInfo, guest)
 			}
 			room.Mu.Unlock()
@@ -301,7 +299,7 @@ func handleRoomMessages(user *UserConn, room *Room) {
 					"host":    userInfo,
 				},
 			}
-			user.Send <- RoomMessage{
+			user.SafeSend(RoomMessage{
 				Event:  "host_check",
 				Sender: nil,
 				Payload: map[string]interface{}{
@@ -313,7 +311,7 @@ func handleRoomMessages(user *UserConn, room *Room) {
 					"auto_join":             room.AllowAutoJoin,
 					"share_state":           room.AllowAutoShare,
 				},
-			}
+			})
 			room.Mu.Unlock()
 		case "close_room":
 			wg.Add(1)
@@ -373,7 +371,7 @@ func handleDisconnect(user *UserConn, room *Room) {
 					"host":    newHostInfo,
 				},
 			}
-			newHost.Send <- RoomMessage{
+			newHost.SafeSend(RoomMessage{
 				Event:  "host_check",
 				Sender: nil,
 				Payload: map[string]interface{}{
@@ -385,7 +383,7 @@ func handleDisconnect(user *UserConn, room *Room) {
 					"auto_join":             room.AllowAutoJoin,
 					"share_state":           room.AllowAutoShare,
 				},
-			}
+			})
 
 			log.Printf("Host transferred from %s to %s", user.UserID, newHostId)
 		} else {
@@ -443,7 +441,7 @@ func handleActionWTAdd(room *Room, userInfo *model.User) {
 	room.WaitingModel[userInfo.UserId] = userInfo
 	hostConn := room.Users[room.HostID]
 	if hostConn != nil {
-		hostConn.Send <- RoomMessage{
+		hostConn.SafeSend(RoomMessage{
 			Event: "update_user_waiting_room",
 			Payload: map[string]interface{}{
 				"action":  "add",
@@ -452,7 +450,7 @@ func handleActionWTAdd(room *Room, userInfo *model.User) {
 				"roomId":  room.ID,
 				"forward": "waiting",
 			},
-		}
+		})
 	}
 }
 func handleActionWTRemove(room *Room, userInfo *model.User, userConn *UserConn) {
@@ -460,7 +458,7 @@ func handleActionWTRemove(room *Room, userInfo *model.User, userConn *UserConn) 
 	delete(room.WaitingModel, userInfo.UserId)
 	hostConn := room.Users[room.HostID]
 	if hostConn != nil {
-		hostConn.Send <- RoomMessage{
+		hostConn.SafeSend(RoomMessage{
 			Event: "update_user_waiting_room",
 			Payload: map[string]interface{}{
 				"action":  "remove",
@@ -469,7 +467,7 @@ func handleActionWTRemove(room *Room, userInfo *model.User, userConn *UserConn) 
 				"roomId":  room.ID,
 				"forward": "waiting",
 			},
-		}
+		})
 	}
 }
 
