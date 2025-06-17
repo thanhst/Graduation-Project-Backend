@@ -12,7 +12,7 @@ func SetupCors() *cors.Cors {
 	frontendPort := dotenv.GetDotEnv("FE_PORT")
 	allowedOrigin := fmt.Sprintf("%s:%s", frontendHost, frontendPort)
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{allowedOrigin},
+		AllowedOrigins:   []string{allowedOrigin, frontendHost},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type", "Upgrade", "Connection"},
 		AllowCredentials: true,

@@ -2,7 +2,7 @@ package router
 
 import (
 	"net/http"
-	customcors "server/config"
+	customcors "server/cmd/config"
 	websocket "server/internal/handlers/websocket"
 
 	"github.com/gorilla/mux"

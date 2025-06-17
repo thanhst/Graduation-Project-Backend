@@ -339,6 +339,10 @@ func handleRoomMessages(user *UserConn, room *Room) {
 			roomsMu.Lock()
 			delete(rooms, room.ID)
 			roomsMu.Unlock()
+		case "ping":
+			user.SafeSend(RoomMessage{
+				Event: "pong",
+			})
 		}
 	}
 }

@@ -12,7 +12,7 @@ import (
 func GetDotEnv(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		err := godotenv.Load("config/.env")
+		err := godotenv.Load("cmd/config/.env")
 		if err != nil {
 			log.Fatal("Error loading .env file")
 		}
@@ -21,7 +21,7 @@ func GetDotEnv(key string) string {
 	return val
 }
 func SetDotEnv(key, value string) error {
-	envFile := "config/.env"
+	envFile := "cmd/config/.env"
 	input, err := os.ReadFile(envFile)
 	if err != nil {
 		return err
