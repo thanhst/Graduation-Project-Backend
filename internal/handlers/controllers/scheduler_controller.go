@@ -65,29 +65,30 @@ func (schedulerController *SchedulerController) Create(w http.ResponseWriter, r 
 			NotificationId: CustomHash.HashMD5(time.Now().String()),
 			UserId:         scheduler.UserId,
 			ClassId:        scheduler.ClassId,
-			Description:    scheduler.Description,
-			Type:           "success",
+			SchedulerId:    &scheduler.SchedulerId,
+			Description:    scheduler.Title,
+			Type:           "info",
 			CreatedAt:      time.Now(),
 		}
 	} else {
 		notification = &model.Notification{
 			NotificationId: CustomHash.HashMD5(time.Now().String()),
 			UserId:         scheduler.UserId,
-			Description:    scheduler.Description,
-			Type:           "success",
+			Description:    scheduler.Title,
+			SchedulerId:    &scheduler.SchedulerId,
+			Type:           "info",
 			CreatedAt:      time.Now(),
 		}
-	}
-
-	if err := schedulerController.notificationService.Create(notification); err != nil {
-		log.Println(err)
-		http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
-		return
 	}
 
 	if err := schedulerController.schedulerService.Create(&scheduler); err != nil {
 		log.Println(err)
 		http.Error(w, "Error to save schedule", http.StatusBadRequest)
+		return
+	}
+	if err := schedulerController.notificationService.Create(notification); err != nil {
+		log.Println(err)
+		http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -100,14 +101,10 @@ func (schedulerController *SchedulerController) Update(w http.ResponseWriter, r 
 		NotificationId: CustomHash.HashMD5(time.Now().String()),
 		UserId:         scheduler.UserId,
 		ClassId:        scheduler.ClassId,
-		Description:    scheduler.Description,
-		Type:           "info",
+		SchedulerId:    &scheduler.SchedulerId,
+		Description:    scheduler.Title,
+		Type:           "success",
 		CreatedAt:      time.Now(),
-	}
-	if err := schedulerController.notificationService.Create(notification); err != nil {
-		log.Println(err)
-		http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
-		return
 	}
 	if err := json.NewDecoder(r.Body).Decode(&scheduler); err != nil {
 		http.Error(w, "Fail to get schedule in body", http.StatusBadRequest)
@@ -115,6 +112,11 @@ func (schedulerController *SchedulerController) Update(w http.ResponseWriter, r 
 	}
 	if err := schedulerController.schedulerService.Update(&scheduler); err != nil {
 		http.Error(w, "Error to update schedule", http.StatusBadRequest)
+		return
+	}
+	if err := schedulerController.notificationService.Create(notification); err != nil {
+		log.Println(err)
+		http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -128,27 +130,28 @@ func (schedulerController *SchedulerController) Delete(w http.ResponseWriter, r 
 		http.Error(w, "Error to delete schedule", http.StatusBadRequest)
 		return
 	}
-	if s, err := schedulerController.schedulerService.View(schedulerId); err != nil {
+	s, err := schedulerController.schedulerService.View(schedulerId)
+	if err != nil {
 		log.Println(err)
 		http.Error(w, "Not found the schedule in server", http.StatusBadRequest)
 		return
-	} else {
-		notification := &model.Notification{
-			NotificationId: CustomHash.HashMD5(time.Now().String()),
-			UserId:         s.UserId,
-			ClassId:        s.ClassId,
-			Description:    s.Description,
-			Type:           "info",
-			CreatedAt:      time.Now(),
-		}
-		if err := schedulerController.notificationService.Create(notification); err != nil {
-			log.Println(err)
-			http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
-			return
-		}
 	}
 	if err := schedulerController.schedulerService.Delete(schedulerId); err != nil {
 		http.Error(w, "Error to delete schedule", http.StatusBadRequest)
+		return
+	}
+	notification := &model.Notification{
+		NotificationId: CustomHash.HashMD5(time.Now().String()),
+		UserId:         s.UserId,
+		ClassId:        s.ClassId,
+		SchedulerId:    &schedulerId,
+		Description:    s.Title,
+		Type:           "warning",
+		CreatedAt:      time.Now(),
+	}
+	if err := schedulerController.notificationService.Create(notification); err != nil {
+		log.Println(err)
+		http.Error(w, "Error to save schedule, notification cannot create", http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

@@ -18,7 +18,10 @@ func SetupRouter() http.Handler {
 	SetupClassroomApp(api)
 	SetupSchedulerRoutes(api)
 	SetupRoomApp(api)
+	SetupEmotionApp(api)
+	SetupNotificationApp(api)
 	SetupStaticRoutes(r)
+
 	websocket.SetupWebsocket(r)
 
 	c := customcors.SetupCors()

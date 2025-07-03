@@ -30,7 +30,7 @@ func createDatabaseIfNotExist(user, pass, host, port, dbname string) error {
 }
 
 func ConnectDB() error {
-	if err := godotenv.Load("config/.env"); err != nil {
+	if err := godotenv.Load("cmd/config/.env"); err != nil {
 		fmt.Println("Warning: .env file not found!")
 	}
 

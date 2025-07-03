@@ -10,4 +10,5 @@ type EmotionDAO interface {
 	GetLatestByUserInRoom(userId, roomId string) (*model.Emotion, error)
 	GetAllInRoom(roomId string, fromTime time.Time) ([]model.Emotion, error)
 	DeleteAllOfRoom(roomId string) error
+	GetByRoomId(roomId string) ([]*model.Emotion, error)
 }

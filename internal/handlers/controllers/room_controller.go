@@ -6,6 +6,7 @@ import (
 	service "server/internal/handlers/services"
 	model "server/internal/models"
 	CustomHash "server/internal/utils/hash"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -81,7 +82,6 @@ func (rm *RoomController) Delete(w http.ResponseWriter, r *http.Request) {
 func (rm *RoomController) GetById(w http.ResponseWriter, r *http.Request) {
 	Vars := mux.Vars(r)
 	roomId := Vars["id"]
-
 	room, err := rm.roomService.RoomRepo.GetByID(roomId)
 	if err != nil {
 		http.Error(w, "Error to get room!", http.StatusInternalServerError)
@@ -89,4 +89,38 @@ func (rm *RoomController) GetById(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(&room)
+}
+func (rm *RoomController) GetByUserId(w http.ResponseWriter, r *http.Request) {
+	Vars := mux.Vars(r)
+	roomId := Vars["id"]
+	limit := r.URL.Query().Get("limit")
+	offset := r.URL.Query().Get("offset")
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		http.Error(w, "Error to convert limit int", http.StatusBadRequest)
+		return
+	}
+	offsetInt, err := strconv.Atoi(offset)
+	if err != nil {
+		http.Error(w, "Error to convert offset int", http.StatusBadRequest)
+		return
+	}
+	rooms, err := rm.roomService.GetByHost(roomId, offsetInt, limitInt)
+	if err != nil {
+		http.Error(w, "Error to get room!", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&rooms)
+}
+func (rm *RoomController) CountRooms(w http.ResponseWriter, r *http.Request) {
+	Vars := mux.Vars(r)
+	userId := Vars["id"]
+	count, err := rm.roomService.CountRooms(userId)
+	if err != nil {
+		http.Error(w, "Error to count room!", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&count)
 }

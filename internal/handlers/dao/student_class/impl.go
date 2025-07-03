@@ -33,8 +33,8 @@ func (dao *studentClassDAOImpl) ListByUser(userID string) ([]model.StudentClass,
 	return scs, err
 }
 
-func (dao *studentClassDAOImpl) ListByClass(classID string) ([]model.StudentClass, error) {
-	var scs []model.StudentClass
+func (dao *studentClassDAOImpl) ListByClass(classID string) ([]*model.StudentClass, error) {
+	var scs []*model.StudentClass
 	err := dao.db.
 		Preload("User").
 		Where("class_id = ?", classID).

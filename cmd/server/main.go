@@ -26,7 +26,7 @@ func main() {
 	log.Printf("Server start!")
 	log.Fatal(http.ListenAndServe(":"+port, httpHandler))
 	// err = http.ListenAndServeTLS(":"+port, "cert.pem", "key.pem", httpHandler)
-	if err != nil {
-		log.Fatalf("HTTPS server failed to start: %v", err)
-	}
+	// if err != nil {
+	// 	log.Fatalf("HTTPS server failed to start: %v", err)
+	// }
 }

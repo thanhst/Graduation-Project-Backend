@@ -11,11 +11,10 @@ import (
 
 type NotificationController struct {
 	notificationService *service.NotificationService
-	classService        *service.ClassService
 }
 
-func NewNotificationController(s *service.NotificationService, cls *service.ClassService) *NotificationController {
-	return &NotificationController{notificationService: s, classService: cls}
+func NewNotificationController(s *service.NotificationService) *NotificationController {
+	return &NotificationController{notificationService: s}
 }
 func (notificationController *NotificationController) Create(w http.ResponseWriter, r *http.Request) {
 	var notification model.Notification
@@ -55,6 +54,29 @@ func (notificationController *NotificationController) GetByClasssrom(w http.Resp
 	Vars := mux.Vars(r)
 	classId := Vars["id"]
 	notifications, err := notificationController.notificationService.GetByClasssrom(classId)
+	if err != nil {
+		http.Error(w, "Error to get notification", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&notifications)
+}
+func (notificationController *NotificationController) GetOne(w http.ResponseWriter, r *http.Request) {
+	Vars := mux.Vars(r)
+	userId := Vars["id"]
+	notification, err := notificationController.notificationService.GetLatestByUserClassrooms(userId)
+	if err != nil {
+		http.Error(w, "Error to get notification", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&notification)
+}
+
+func (notificationController *NotificationController) GetByUserClassrooms(w http.ResponseWriter, r *http.Request) {
+	Vars := mux.Vars(r)
+	userId := Vars["id"]
+	notifications, err := notificationController.notificationService.GetByUserClassrooms(userId)
 	if err != nil {
 		http.Error(w, "Error to get notification", http.StatusInternalServerError)
 		return

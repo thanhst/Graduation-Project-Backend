@@ -97,7 +97,11 @@ func (userController *UserController) UpdateUser(w http.ResponseWriter, r *http.
 			http.Error(w, "Error to save image!", http.StatusInternalServerError)
 			return
 		}
-		user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + filePath
+		if dotenv.GetDotEnv("APP_ENV") == "production" {
+			user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + filePath
+		} else {
+			user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + filePath
+		}
 	} else {
 		files, err := filepath.Glob("./uploads/" + user.UserId + ".*")
 		if err == nil {
@@ -105,8 +109,11 @@ func (userController *UserController) UpdateUser(w http.ResponseWriter, r *http.
 				os.Remove(f)
 			}
 		}
-
-		user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/" + strconv.Itoa(rand.IntN(8)+1) + ".jpg"
+		if dotenv.GetDotEnv("APP_ENV") == "production" {
+			user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + "/uploads/" + strconv.Itoa(rand.IntN(8)+1) + ".jpg"
+		} else {
+			user.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + "/uploads/" + strconv.Itoa(rand.IntN(8)+1) + ".jpg"
+		}
 		// http.Error(w, "Cannot get image: "+err.Error(), http.StatusBadRequest)
 		// return
 	}
@@ -226,7 +233,11 @@ func (userController *UserController) UpdateInformationOfUser(w http.ResponseWri
 				http.Error(w, "Error to save image!", http.StatusInternalServerError)
 				return
 			}
-			existingUser.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + filePath
+			if dotenv.GetDotEnv("APP_ENV") == "production" {
+				existingUser.ProfilePicture = dotenv.GetDotEnv("APP_URL") + filePath
+			} else {
+				existingUser.ProfilePicture = dotenv.GetDotEnv("APP_URL") + ":" + dotenv.GetDotEnv("APP_PORT") + filePath
+			}
 		}
 		existingUser.FullName = fullname
 	}

@@ -2,7 +2,14 @@ CREATE TABLE emotions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     room_id VARCHAR(255) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
-    emotion ENUM('Happy', 'Sad', 'Neutral', 'Fear', 'Surprise'),
+    emotion ENUM(
+        'Happy',
+        'Sad',
+        'Neutral',
+        'Fear',
+        'Surprise',
+        'Angry',
+        'Disgust'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     INDEX idx_room_id (room_id),

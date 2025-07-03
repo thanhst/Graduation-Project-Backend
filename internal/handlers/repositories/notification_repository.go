@@ -12,6 +12,8 @@ type NotificationRepository interface {
 	Delete(id string) error
 	DeleteAllOfUser(userID string) error
 	GetByClasssrom(classId string) ([]*model.Notification, error)
+	GetByUserClassrooms(userId string) ([]*model.Notification, error)
+	GetLatestByUserClassrooms(userId string) (*model.Notification, error)
 }
 type notificationRepository struct {
 	dao notificationdao.NotificationDAO
@@ -42,4 +44,11 @@ func (r *notificationRepository) DeleteAllOfUser(userID string) error {
 }
 func (r *notificationRepository) GetByClasssrom(userId string) ([]*model.Notification, error) {
 	return r.dao.GetByClasssrom(userId)
+}
+
+func (r *notificationRepository) GetByUserClassrooms(userId string) ([]*model.Notification, error) {
+	return r.dao.GetByUserClassrooms(userId)
+}
+func (r *notificationRepository) GetLatestByUserClassrooms(userId string) (*model.Notification, error) {
+	return r.dao.GetLatestByUserClassrooms(userId)
 }

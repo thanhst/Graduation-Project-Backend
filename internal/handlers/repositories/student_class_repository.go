@@ -8,7 +8,7 @@ import (
 type StudentClassRepository interface {
 	Get(userID, classID string) (*model.StudentClass, error)
 	ListByUser(userID string) ([]model.StudentClass, error)
-	ListByClass(classID string) ([]model.StudentClass, error)
+	ListByClass(classID string) ([]*model.StudentClass, error)
 	JoinClass(sc *model.StudentClass) error
 	Update(sc *model.StudentClass) error
 	Delete(sc *model.StudentClass) error
@@ -37,7 +37,7 @@ func (r *studentClassRepository) ListByUser(userID string) ([]model.StudentClass
 	return r.dao.ListByUser(userID)
 }
 
-func (r *studentClassRepository) ListByClass(classID string) ([]model.StudentClass, error) {
+func (r *studentClassRepository) ListByClass(classID string) ([]*model.StudentClass, error) {
 	return r.dao.ListByClass(classID)
 }
 

@@ -9,4 +9,6 @@ type NotificationDAO interface {
 	Delete(id string) error
 	DeleteAllOfUser(userId string) error
 	GetByClasssrom(classId string) ([]*model.Notification, error)
+	GetByUserClassrooms(userId string) ([]*model.Notification, error)
+	GetLatestByUserClassrooms(userId string) (*model.Notification, error)
 }

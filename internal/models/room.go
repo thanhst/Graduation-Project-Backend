@@ -12,6 +12,6 @@ type Room struct {
 	CreatedAt time.Time  `gorm:"autoCreateTime" json:"createdAt"`
 	EndedAt   *time.Time `gorm:"autoCreateTime" json:"endAt,omitempty"`
 
-	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;"`
-	User      User      `gorm:"foreignKey:Host;references:UserId;"`
+	Classroom Classroom `gorm:"foreignKey:ClassId;references:ClassId;" json:"Classroom"`
+	User      User      `gorm:"foreignKey:Host;references:UserId;" json:"User"`
 }

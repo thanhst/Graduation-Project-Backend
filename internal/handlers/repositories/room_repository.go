@@ -13,6 +13,7 @@ type RoomRepository interface {
 	Update(room *model.Room) error
 	CloseRoom(roomID string) error
 	Delete(roomID string) error
+	CountRooms(userId string) (int64, error)
 }
 type roomRepository struct {
 	dao roomdao.RoomDAO
@@ -48,4 +49,7 @@ func (r *roomRepository) CloseRoom(roomID string) error {
 
 func (r *roomRepository) Delete(roomID string) error {
 	return r.dao.Delete(roomID)
+}
+func (r *roomRepository) CountRooms(userId string) (int64, error) {
+	return r.dao.CountRooms(userId)
 }

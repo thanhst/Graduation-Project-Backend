@@ -15,6 +15,9 @@ func NewEmotionService(EmotionRepo repository.EmotionRepository) *EmotionService
 func (emotionService *EmotionService) Create(schedule *model.Emotion) error {
 	return emotionService.EmotionRepo.Create(schedule)
 }
+func (emotionService *EmotionService) GetByRoomId(roomId string) ([]*model.Emotion, error) {
+	return emotionService.EmotionRepo.GetByRoomId(roomId)
+}
 
 // func (emotionService *EmotionService) Update(schedule *model.Emotion) error {
 // 	return emotionService.EmotionRepo.Update(schedule)

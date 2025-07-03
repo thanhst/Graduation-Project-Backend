@@ -40,3 +40,14 @@ func (dao *emotionDAOImpl) GetAllInRoom(roomId string, fromTime time.Time) ([]mo
 func (dao *emotionDAOImpl) DeleteAllOfRoom(roomId string) error {
 	return dao.db.Where("room_id = ?", roomId).Delete(&model.Emotion{}).Error
 }
+func (dao *emotionDAOImpl) GetByRoomId(roomId string) ([]*model.Emotion, error) {
+	var emotions []*model.Emotion
+	if err := dao.db.Where("room_id = ?", roomId).
+		Find(&emotions).
+		Preload("Classroom").
+		Preload("User").
+		Error; err != nil {
+		return nil, err
+	}
+	return emotions, nil
+}

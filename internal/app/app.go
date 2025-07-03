@@ -47,3 +47,11 @@ func SetupRoomApp() *controller.RoomController {
 	roomController := controller.NewRoomController(ServiceContainer.RoomService)
 	return roomController
 }
+func SetupEmotionApp() *controller.EmotionController {
+	emotionController := controller.NewEmotionController(ServiceContainer.EmotionService)
+	return emotionController
+}
+func SetupNotificationApp() *controller.NotificationController {
+	notificationController := controller.NewNotificationController(ServiceContainer.NotificationService)
+	return notificationController
+}

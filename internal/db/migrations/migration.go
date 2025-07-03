@@ -28,7 +28,9 @@ func MigrateWithMigration(gdb *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-
+	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+		log.Println("Warning during down:", err)
+	}
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return err
 	}

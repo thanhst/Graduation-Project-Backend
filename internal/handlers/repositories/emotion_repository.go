@@ -11,6 +11,7 @@ type EmotionRepository interface {
 	GetLatestByUserInRoom(userId, roomId string) (*model.Emotion, error)
 	GetAllInRoom(roomId string, fromTime time.Time) ([]model.Emotion, error)
 	DeleteAllOfRoom(roomId string) error
+	GetByRoomId(roomId string) ([]*model.Emotion, error)
 }
 type emotionRepository struct {
 	emotionDAO emotiondao.EmotionDAO
@@ -34,4 +35,7 @@ func (r *emotionRepository) GetAllInRoom(roomId string, fromTime time.Time) ([]m
 
 func (r *emotionRepository) DeleteAllOfRoom(roomId string) error {
 	return r.emotionDAO.DeleteAllOfRoom(roomId)
+}
+func (r *emotionRepository) GetByRoomId(roomId string) ([]*model.Emotion, error) {
+	return r.emotionDAO.GetByRoomId(roomId)
 }

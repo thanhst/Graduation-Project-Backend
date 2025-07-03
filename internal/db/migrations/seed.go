@@ -240,10 +240,15 @@ func SeedNotification(db *gorm.DB) error {
 	if err := db.WithContext(ctx).Find(&classes).Error; err != nil {
 		return err
 	}
+	var schedulers []model.Scheduler
+	if err := db.WithContext(ctx).Find(&schedulers).Error; err != nil {
+		return err
+	}
 	for i := 0; i < 100; i++ {
 		notification := model.Notification{
 			NotificationId: CustomHash.HashMD5(time.Now().String()),
 			UserId:         users[rand.Intn(len(users))].UserId,
+			SchedulerId:    &schedulers[len(schedulers)-1].SchedulerId,
 			ClassId:        &classes[rand.Intn(len(classes))].ClassId,
 			Description:    helper.RandomDescription(),
 			Type:           "info",

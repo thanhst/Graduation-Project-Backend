@@ -47,12 +47,45 @@ func (dao *notificationDAOImpl) DeleteAllOfUser(userId string) error {
 	return dao.db.Where("user_id = ?", userId).Delete(&model.Notification{}).Error
 }
 
-func (dao *notificationDAOImpl) GetByClasssrom(classId string) ([]*model.Notification, error) {
+func (dao *notificationDAOImpl) GetByClasssrom(classID string) ([]*model.Notification, error) {
 	var data []*model.Notification
-	if err := dao.db.Where("class_id = ?", classId).
+	if err := dao.db.Where("class_id = ?", classID).
 		Order("created_at DESC").
 		Find(&data).Error; err != nil {
 		return nil, err
 	}
 	return data, nil
+}
+func (dao *notificationDAOImpl) GetByUserClassrooms(userID string) ([]*model.Notification, error) {
+	var data []*model.Notification
+
+	err := dao.db.
+		Table("notifications AS n").
+		Joins("LEFT JOIN classrooms c ON n.class_id = c.class_id").
+		Joins("LEFT JOIN student_classes sc ON sc.class_id = c.class_id AND sc.user_id = ?", userID).
+		Where("sc.user_id IS NOT NULL OR n.user_id = ?", userID).
+		Order("n.created_at DESC").
+		Preload("Scheduler").
+		Preload("Classroom").
+		Find(&data).Error
+	return data, err
+}
+func (dao *notificationDAOImpl) GetLatestByUserClassrooms(userID string) (*model.Notification, error) {
+	var notif model.Notification
+
+	err := dao.db.
+		Table("notifications AS n").
+		Joins("LEFT JOIN classrooms c ON n.class_id = c.class_id").
+		Joins("LEFT JOIN student_classes sc ON sc.class_id = c.class_id AND sc.user_id = ?", userID).
+		Where("sc.user_id IS NOT NULL OR n.user_id = ?", userID).
+		Order("n.created_at DESC").
+		Limit(1).
+		Preload("Classroom").
+		Preload("Scheduler").
+		Find(&notif).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return &notif, nil
 }

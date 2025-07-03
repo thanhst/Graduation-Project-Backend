@@ -145,6 +145,7 @@ func (ac *AccountController) Logout(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(map[string]string{
 				"message": "Opps! Server have error!",
 			})
+			return
 		}
 		helper.RemoveCookies(w)
 		w.WriteHeader(http.StatusBadRequest)
@@ -181,6 +182,7 @@ func (ac *AccountController) Logout(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(map[string]string{
 				"message": "Opps! Server have error!",
 			})
+			return
 		}
 		helper.RemoveCookies(w)
 		log.Printf("%v logout!\n", userID)

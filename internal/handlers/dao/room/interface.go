@@ -10,4 +10,5 @@ type RoomDAO interface {
 	Update(room *model.Room) error
 	CloseRoom(roomID string) error
 	Delete(roomID string) error
+	CountRooms(userId string) (int64, error)
 }

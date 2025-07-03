@@ -13,6 +13,10 @@ func NewStudentClassService(studentClassRepo repository.StudentClassRepository) 
 	return &StudentClassService{studentClassRepo: studentClassRepo}
 }
 
+func (stcls *StudentClassService) ListByClass(classId string) ([]*model.StudentClass, error) {
+	return stcls.studentClassRepo.ListByClass(classId)
+}
+
 func (stcls *StudentClassService) GetClassroomsByUser(userId string, limit int, offset int) ([]*model.Classroom, error) {
 	return stcls.studentClassRepo.GetClassroomsByUser(userId, limit, offset)
 }

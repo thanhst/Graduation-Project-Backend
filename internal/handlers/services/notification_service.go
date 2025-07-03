@@ -25,3 +25,9 @@ func (NotificationService *NotificationService) Delete(notificationId string) er
 func (NotificationService *NotificationService) GetByClasssrom(classId string) ([]*model.Notification, error) {
 	return NotificationService.NotificationRepo.GetByClasssrom(classId)
 }
+func (NotificationService *NotificationService) GetLatestByUserClassrooms(userId string) (*model.Notification, error) {
+	return NotificationService.NotificationRepo.GetLatestByUserClassrooms(userId)
+}
+func (NotificationService *NotificationService) GetByUserClassrooms(userId string) ([]*model.Notification, error) {
+	return NotificationService.NotificationRepo.GetByUserClassrooms(userId)
+}

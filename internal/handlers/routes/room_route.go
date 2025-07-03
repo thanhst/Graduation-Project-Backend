@@ -15,4 +15,6 @@ func SetupRoomApp(r *mux.Router) {
 	room.HandleFunc("/update", roomController.Update).Methods("POST")
 	room.HandleFunc("/{id}/delete", roomController.Delete).Methods("DELETE")
 	room.HandleFunc("/{id}/get", roomController.GetById).Methods("GET")
+	room.HandleFunc("/user/{id}/get", roomController.GetByUserId).Methods("GET")
+	room.HandleFunc("/user/{id}/count", roomController.CountRooms).Methods("GET")
 }

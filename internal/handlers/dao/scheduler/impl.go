@@ -83,7 +83,8 @@ func (dao *schedulerDAOImpl) GetSchedulerByUser(userId string) ([]*model.Schedul
 		Preload("Classroom").
 		Preload("Room").
 		Where("s.user_id = ? OR sc.user_id = ?", userId, userId).
-		Limit(100).
+		Order("s.start_time DESC").
+		Limit(20).
 		Offset(0).
 		Select("DISTINCT s.*").
 		Find(&schedulers).Error
